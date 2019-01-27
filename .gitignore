@@ -1,0 +1,14 @@
+# nodejs
+node_modules/
+
+# swift/cocaopods/xcode
+app/tourmaline-helper/Pods
+app/tourmaline-helper/DerivedData
+
+# build folder
+tourmaline-darwin-x64/
+
+# editor things
+.idea/
+.DS_Store
+.vscode/

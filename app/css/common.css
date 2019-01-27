@@ -1,0 +1,86 @@
+/* variables */
+
+:root {
+    --left-margin: 44.75px;
+    --right-margin: 44.75px;
+    --window-height: 23px;
+    --overflow: 6px;
+    --screen-width: 1920px;
+    --screen-height: 1080px;
+}
+
+#bgimage {
+    min-width: var(--screen-width);
+    min-height: var(--screen-height);
+    background-image: white;
+    background-position: center;
+    background-size: var(--screen-width);
+}
+
+#bgimage-bar {
+    margin: 0 var(--overflow) 0 var(--overflow);
+    position: absolute;
+    top: 0;
+    z-index: 1;
+    background: #333;
+
+    /*-webkit-mask-image: linear-gradient(to right, black var(--mask-location), transparent calc(var(--mask-location) + 100px));*/
+    transition: -webkit-mask-image 1s;
+}
+
+body {
+    /*background: url(file:///Users/denosawr/Pictures/deer.jpg);
+  background-size: var(--screen-width);
+  background-position-x: var(--overflow);*/
+    margin: 0;
+    color: white;
+    overflow: hidden;
+    line-height: var(--window-height);
+
+    font-family: -apple-system, BlinkMacSystemFont;
+    font-size: 14px;
+
+    user-select: none;
+    opacity: 1;
+}
+
+.bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: 0 calc(var(--right-margin) + var(--overflow)) 0
+        calc(var(--left-margin) + var(--overflow));
+    display: flex;
+    flex-direction: row;
+    /*justify-content: space-between;
+  align-content: space-between;
+  */
+    justify-content: flex-start;
+    align-items: center;
+    z-index: 2;
+}
+
+#left {
+    flex: 1;
+    justify-content: flex-start;
+}
+
+#middle {
+    flex: 1;
+    justify-content: center;
+}
+
+#right {
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+}
+
+#top-bar * {
+    pointer-events: none;
+}
