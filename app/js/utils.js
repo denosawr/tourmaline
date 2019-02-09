@@ -1,7 +1,26 @@
 const fs = require("fs");
 const cp = require("child_process");
+const { ipcRenderer } = require("electron");
+
+let processHandlers = {};
 
 module.exports = {
+    createHelper: function(name, handler, args) {
+        let processValue = ipcRenderer.sendSync("create-helper-process", [
+            name,
+            args,
+        ]);
+        processHandlers[processValue] = handler;
+        console.log(processValue, name);
+
+        return processValue;
+    },
+
+    killHelper: function(processValue) {
+        ipcRenderer.send("kill-helper-process", processValue);
+        delete processHandlers[processValue];
+    },
+
     pathToHelper: function() {
         return "/Users/denosawr/Documents/Programming/tourmaline/app/tourmaline-helper/tourmaline-helper-app";
         const productionAppPath = path.join(
@@ -12,16 +31,21 @@ module.exports = {
             process.cwd(),
             "../Frameworks/tourmaline-helper-app"
         );
-        cp.spawn(
-            `echo ${productionAppPath}, ${fs.existsSync(
-                productionAppPath
-            )} > ~/test.txt`,
-            [],
-            { shell: true }
-        );
         return fs.existsSync(productionAppPath)
             ? productionAppPath
             : productionBinPath;
+    },
+    startHelperHooks: function() {
+        ipcRenderer.on("helper-process-message", (event, arg) => {
+            let processValue = arg[0],
+                data = arg[1];
+            processHandlers[processValue](data);
+        });
+
+        ipcRenderer.on("helper-process-exit", (event, arg) => {
+            delete processHandlers[arg];
+            // delete the handler, because the process is now dead
+        });
     },
     /**
      * Creates a handler to log childprocess errors to console.

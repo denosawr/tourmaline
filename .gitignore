@@ -1,9 +1,9 @@
 # nodejs
 node_modules/
 
-# swift/cocaopods/xcode
-app/tourmaline-helper/Pods
-app/tourmaline-helper/DerivedData
+# swift (tourmaline-helper)
+tourmaline-helper/.build
+tourmaline-helper/DerivedData
 
 # build folder
 tourmaline-darwin-x64/

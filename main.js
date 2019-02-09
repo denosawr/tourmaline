@@ -1,32 +1,15 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const fs = require("fs");
 const utils = require(__dirname + "/app/js/utils.js");
 const cp = require("child_process");
 
-// temporary
-let a = cp.spawn(
-    "/Users/denosawr/Documents/Programming/tourmaline/app/tourmaline-helper/tourmaline-helper-app",
-    [],
-    { detached: true, shell: true }
-);
+let lastProcessCount = 0;
+let processes = {};
 
-a.stdout.on("data", d => {
-    console.log(d.toString());
-    fs.appendFile(
-        "/Users/denosawr/Downloads/General/test.txt",
-        d.toString(),
-        e => {
-            if (e) throw e;
-        }
-    );
-});
-
-/*
 process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = true; // disables CSP/unsafe-eval warning
 let arguments_ = Array.from(process.argv);
 
-fs.readdir("./", console.log);
-
+let win;
 function createWindow() {
     // Create the browser window.
     const screen = require("electron").screen; // cannot use until app.ready emitted
@@ -48,10 +31,9 @@ function createWindow() {
     });
 
     if (arguments_ && arguments_.includes("--dev")) {
-        win.openDevTools();
+        win.openDevTools({ mode: "detach" });
     }
 
-    // make window always show on top
     app.dock.hide();
 
     win.setVisibleOnAllWorkspaces(true);
@@ -59,10 +41,10 @@ function createWindow() {
     win.setIgnoreMouseEvents(true);
 
     win.setAlwaysOnTop(true, "screen-saver");
-    win.setPosition(-6, 0, false);
+    win.setPosition(-6, -1, false);
 
     const menuBarHeight = utils.menuBarHeight();
-    win.setSize(display.workArea.width + 12, menuBarHeight);
+    win.setSize(display.workArea.width + 12, menuBarHeight + 2);
 
     // and load the index.html of the app.
     win.loadFile(__dirname + "/app/index.html");
@@ -71,4 +53,7 @@ function createWindow() {
 }
 
 app.on("ready", createWindow);
-*/
+app.on("will-quit", event => {
+    console.log("Will quit.");
+    win.webContents.send("will-quit");
+});

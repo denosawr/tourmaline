@@ -20,6 +20,9 @@ global.processes = {};
  * @param {string} pluginName
  */
 function loadPlugin(pluginName) {
+    if (!pluginName.endsWith(".js")) {
+        return;
+    }
     const plugin = require(__dirname + "/widgets/" + pluginName);
     plugin.init(emitter);
 }
@@ -50,7 +53,7 @@ function changeWallpaper() {
             let bgimage = document.getElementById("bgimage");
             bgimage.setAttribute(
                 "style",
-                `background-image: url(file://${path})`
+                `background-image: url(${encodeURI('file://' + path)})`
             );
             setTimeout(() => {
                 document
@@ -76,6 +79,9 @@ function main() {
         "screen-height": screen.height + "px",
         "window-height": window.outerHeight + "px",
     });
+
+    // hooks for helper processes
+    utils.startHelperHooks();
 
     event = require(__dirname + "/js/events.js");
     emitter = event.startListeners();

@@ -11,36 +11,30 @@ let systemInfoWidget;
  * @param {string} data
  */
 function refreshMenuBarItems(data) {
-    // called when active window _or_ active space changes.
+    // called when active window
+    console.log("Menu Bar Refresh!");
 
-    let helperProcess = cp.spawn(utils.pathToHelper(), ["menuBarItems"], {
-        detached: true,
-    });
+    console.log("On data", data);
+    let menubarObjects = data.splice(1); // remove "Apple" element
 
-    helperProcess.stdout.on("data", function(data) {
-        let menubarObjects = eval(data.toString()) // Buffer to String
-            .splice(1); // remove "Apple" element
+    global.widgets.localizedNameHolder.textContent = menubarObjects[0];
 
-        global.widgets.localizedNameHolder.textContent = menubarObjects[0];
+    // clear menuBar
+    while (global.widgets.childMenuBar.firstChild) {
+        global.widgets.childMenuBar.removeChild(
+            global.widgets.childMenuBar.firstChild
+        );
+    }
 
-        // clear menuBar
-        while (global.widgets.childMenuBar.firstChild) {
-            global.widgets.childMenuBar.removeChild(
-                global.widgets.childMenuBar.firstChild
-            );
-        }
+    for (let item of menubarObjects.splice(1)) {
+        let element = utils.makeElement("div", {
+            class: ["macMenuBarItem"],
+            textContent: item,
+        });
+        global.widgets.childMenuBar.appendChild(element);
+    }
 
-        for (let item of menubarObjects.splice(1)) {
-            let element = utils.makeElement("div", {
-                class: ["macMenuBarItem"],
-                textContent: item,
-            });
-            global.widgets.childMenuBar.appendChild(element);
-        }
-
-        systemInfoWidget.positionBar();
-    });
-    utils.errorHandler(helperProcess);
+    systemInfoWidget.positionBar();
 }
 
 /**
@@ -49,7 +43,7 @@ function refreshMenuBarItems(data) {
  */
 function menuItemSelectionChange(data) {
     let selectedElement = data.toString().trim();
-
+    console.log("selection Change");
     if (selectedElement == "////") {
         // nothing selected
 
@@ -72,21 +66,22 @@ function menuItemSelectionChange(data) {
 
 function activate() {
     // Start selectionChangeHandler
-
-    selectionChangeProcess = cp.spawn(utils.pathToHelper(), [
+    /*selectionChangeProcess = cp.spawn(utils.pathToHelper(), [
         "menuBarSelection",
-        { detached: true },
     ]);
     // Error handling
-    utils.errorHandler(selectionChangeProcess);
+    utils.errorHandler(selectionChangeProcess, "selectionChangeProcess");
 
-    selectionChangeProcess.stdout.on("data", menuItemSelectionChange);
+    selectionChangeProcess.stdout.on("data", menuItemSelectionChange);*/
+    /*selectionChangeProcess = utils.createHelper(
+        "selectionChangeHandler",
+        menuItemSelectionChange,
+        ["menuBarSelection"]
+    );*/
 }
 
 function deactivate() {
-    try {
-        selectionChangeProcess.kill();
-    } catch {} // do nothing, everything'll be alright :)
+    //utils.killHelper(selectionChangeProcess);
 }
 
 module.exports.init = function(emitter) {
@@ -96,9 +91,9 @@ module.exports.init = function(emitter) {
     globalEmitter.on("activate", activate);
     globalEmitter.on("deactivate", deactivate);
     globalEmitter.on("window-change", refreshMenuBarItems);
+    globalEmitter.on("selection-change", menuItemSelectionChange);
 
     changeWallpaper();
-    refreshMenuBarItems();
 
     global.widgets.menuBar = utils.makeElement("div", {
         class: ["container"],
@@ -145,6 +140,7 @@ utils.injectCSS(`
 .macMenuBarChild {
     margin-top: -22px;
     transition: margin-top 0.15s;
+    white-space: nowrap;
 }
 
 .macMenuBarChild.itemActivated {
