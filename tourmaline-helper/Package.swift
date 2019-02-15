@@ -6,9 +6,8 @@ let package = Package(
     name: "tourmaline-helper",
     dependencies: [
         // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
-        // .package(url: "https://github.com/socketio/socket.io-client-swift", from: "1.0.0")
         .package(url: "https://github.com/socketio/socket.io-client-swift", .upToNextMinor(from: "13.0.0"))
+        // Can't use latest version, as it requires swift-tools-version 4.2 which I don't have
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.

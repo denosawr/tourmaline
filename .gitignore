@@ -6,7 +6,7 @@ tourmaline-helper/.build
 tourmaline-helper/DerivedData
 
 # build folder
-tourmaline-darwin-x64/
+build/
 
 # editor things
 .idea/
