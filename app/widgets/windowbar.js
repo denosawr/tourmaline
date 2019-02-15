@@ -12,9 +12,6 @@ let systemInfoWidget;
  */
 function refreshMenuBarItems(data) {
     // called when active window
-    console.log("Menu Bar Refresh!");
-
-    console.log("On data", data);
     let menubarObjects = data.splice(1); // remove "Apple" element
 
     global.widgets.localizedNameHolder.textContent = menubarObjects[0];
@@ -43,7 +40,6 @@ function refreshMenuBarItems(data) {
  */
 function menuItemSelectionChange(data) {
     let selectedElement = data.toString().trim();
-    console.log("selection Change");
     if (selectedElement == "////") {
         // nothing selected
 
@@ -92,8 +88,6 @@ module.exports.init = function(emitter) {
     globalEmitter.on("deactivate", deactivate);
     globalEmitter.on("window-change", refreshMenuBarItems);
     globalEmitter.on("selection-change", menuItemSelectionChange);
-
-    changeWallpaper();
 
     global.widgets.menuBar = utils.makeElement("div", {
         class: ["container"],

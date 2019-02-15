@@ -1,6 +1,8 @@
 import Cocoa
 import SocketIO
 import Foundation
+import AppKit
+import ImageIO
 
 var firstTime: Bool = true
 var detectSelectionChange = false
@@ -24,6 +26,87 @@ class Manager: SocketManager {
 let manager = Manager(socketURL: URL(string:"http://localhost:3000")!)
 let socket = manager.defaultSocket
 
+extension NSImage {
+    func base64String() -> String? {
+        guard
+            let bits = self.representations.first as? NSBitmapImageRep,
+            let data = bits.representation(using: .png, properties: [:])
+            else {
+                return nil
+        }
+        
+        return "data:image/png;base64,\(data.base64EncodedString())"
+    }
+}
+
+
+/**
+ Saves the current desktop wallpaper to /tmp/wallpaper.png.
+ - returns: name of image file (just suffix e.g. image.png) on success, nil on failure.
+ */
+func updateWallpaper() -> String? {
+    guard let screen = NSScreen.main else {
+        NSLog("No active screen. No idea why.")
+        return nil
+    }
+    guard let desktopImageURL = NSWorkspace.shared.desktopImageURL(for: screen) else {
+        NSLog("No desktop image.")
+        return nil
+    }
+    let desktopImageName = desktopImageURL.path.components(separatedBy: "/").last!
+    
+    let windowInfoList = CGWindowListCopyWindowInfo(.optionAll, kCGNullWindowID)!
+        as NSArray
+    let apps = NSRunningApplication.runningApplications(withBundleIdentifier:
+        /* Bundle ID of the application, e.g.: */ "com.apple.dock")
+    if apps.isEmpty {
+        // Application is not currently running
+        print("The application is not running")
+        return nil
+    }
+    let appPID = apps[0].processIdentifier
+    
+    var appWindowInfo: NSDictionary = NSDictionary()
+    for info_ in windowInfoList {
+        let info = info_ as! NSDictionary
+        if (info[kCGWindowOwnerPID as NSString] as! NSNumber).intValue == appPID {
+            if let windowName = info[kCGWindowName as NSString] {
+                if (windowName as! String).hasPrefix("Desktop Picture") &&
+                    (windowName as! String).hasSuffix(desktopImageName) {
+                    appWindowInfo = info
+                }
+            }
+        }
+    }
+    let windowID: CGWindowID = (appWindowInfo[kCGWindowNumber as NSString] as! NSNumber).uint32Value
+    
+    guard let windowImageNoColorSpace =
+        CGWindowListCreateImage(.infinite, .optionIncludingWindow, windowID,
+                                [.boundsIgnoreFraming, .nominalResolution]) else {
+        NSLog("Failed to capture image.")
+        return nil
+    }
+    
+    guard let windowImageColorSpace = windowImageNoColorSpace.copy(colorSpace: screen.colorSpace!.cgColorSpace!) else {
+        NSLog("Could not copy. Rip.")
+        return nil
+    }
+    
+    let url: CFURL = NSURL(fileURLWithPath: "/tmp/wallpaper.png")
+    guard let destination: CGImageDestination = CGImageDestinationCreateWithURL(url, kUTTypePNG, 1, nil) else {
+        NSLog("Failed to create CGImageDestination.")
+        return nil
+    }
+    
+    CGImageDestinationAddImage(destination, windowImageColorSpace, nil)
+    
+    if (!CGImageDestinationFinalize(destination)) {
+        NSLog("Failed to write image")
+        return nil
+    }
+    return desktopImageName
+}
+
 
 /**
  Gets the menu bar items of the foreground application.
@@ -32,7 +115,7 @@ let socket = manager.defaultSocket
  */
 func getMenuItems() -> [AXUIElement] {
     // get NSRunningApplication
-    guard let application = NSWorkspace.shared.frontmostApplication else {
+    guard let application = NSWorkspace.shared.menuBarOwningApplication else {
         return []
     }
     
@@ -50,7 +133,7 @@ func getMenuItems() -> [AXUIElement] {
     var AXMenuReference: AnyObject?
     AXUIElementCopyAttributeValue(AXRunningApplication, "AXMenuBar" as CFString, &AXMenuReference)
     guard let AXMenu = AXMenuReference else {
-        NSLog("AXRunningApplication has no AXMenuBar")
+        // NSLog("AXRunningApplication has no AXMenuBar") // some apps are like this so we don't want spam
         return []
     }
     
@@ -156,7 +239,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     /// An observer called when the active space is changed.
     @objc func spaceChanged(notif: NSNotification!) {
+        // To implement: https://github.com/gechr/WhichSpace/blob/master/WhichSpace/Classes/AppDelegate.swift
+        
         socket.emit("spaceChange")
+        guard let wallpaperName = updateWallpaper() else {
+            socket.emit("reloadBackground", "default")
+            return
+        }
+        socket.emit("reloadBackground", wallpaperName)
     }
 }
 
@@ -229,6 +319,9 @@ func createSocket() {
         detectSelectionChange = false
         detectSelectionChangeSetup = false
     }
+    socket.on("getWallpaper") { (dataArray, ack) in
+        updateWallpaper()
+    }
     // shutdown. called on main app exit
     socket.on("shutdown") { (dataArray, ack) in
         NSLog("Shutting down...")
@@ -250,6 +343,7 @@ func checkForPermissions() {
     }
 }
 
+updateWallpaper()
 
 // create application delegate - required to use notification centre
 let app = NSApplication.shared

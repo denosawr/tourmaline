@@ -1,5 +1,4 @@
-/*
- * This class listens for both menubar and system
+/* This class listens for both menubar and system
  * events and emits signals.
  */
 
@@ -23,6 +22,7 @@ let socket;
 /**
  * @event window-change When currently active window changes, this is emitted.
  * @event space-change When current space changes, this is emitted.
+ * @event reload-background Reload the background image of the bar.
  * @event activate Focus gained. Squad, assemble.
  * @event deactivate Focus lost. Squad... uh... deassemble.
  * @event selection-change Selected item in menu bar changed. Will only be called during when activated.
@@ -84,24 +84,27 @@ module.exports = {
 
             socket = socket_;
 
+            socket.emit("getWallpaper");
             console.log("connected to a new socket.");
             socket.on("disconnect", function() {
                 console.warn("user disconnected");
             });
 
             socket.on("windowChange", function(msg) {
-                console.log("message", msg, typeof msg);
                 emit("window-change", msg)();
             });
 
             socket.on("selectionChange", function(msg) {
-                console.log("selection change", msg);
                 global.variables.selected = !(msg == "////");
                 emit("selection-change", msg)();
             });
 
             socket.on("spaceChange", function() {
                 emit("space-change")();
+            });
+
+            socket.on("reloadBackground", function(msg) {
+                emit("reload-background", msg)();
             });
         });
 

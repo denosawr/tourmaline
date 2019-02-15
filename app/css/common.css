@@ -12,7 +12,7 @@
 #bgimage {
     min-width: var(--screen-width);
     min-height: var(--screen-height);
-    background-image: white;
+    background-image: url(file:///private/tmp/wallpaper.png);
     background-position: center;
     background-size: var(--screen-width);
 }

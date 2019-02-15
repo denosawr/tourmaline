@@ -3,12 +3,12 @@
  */
 
 const { ipcRenderer } = require("electron");
-const wallpaper = require("wallpaper");
 const fs = require("fs");
 const path = require("path");
 const utils = require(path.resolve(__dirname, "js/utils.js"));
 
 let event, emitter; // will be imported/defined later in main()
+let count = 0;
 
 // Global objects, accessible inside widgets/modules
 global.variables = {};
@@ -43,25 +43,23 @@ function findPlugins() {
 /**
  * Call to refresh the wallpaper.
  */
-function changeWallpaper() {
+function darkenMenubar() {
     document
         .getElementsByTagName("body")[0]
         .setAttribute("style", "opacity: 0; transition: none;");
+}
 
-    setTimeout(() => {
-        wallpaper.get().then(path => {
-            let bgimage = document.getElementById("bgimage");
-            bgimage.setAttribute(
-                "style",
-                `background-image: url(${encodeURI('file://' + path)})`
-            );
-            setTimeout(() => {
-                document
-                    .getElementsByTagName("body")[0]
-                    .setAttribute("style", "transition: 0.3s; opacity: 1;");
-            }, 200);
-        });
-    }, 1000); // timeout to allow for animation to do its magic
+function reloadBackground() {
+    console.log("reloadBackground");
+    let bgimage = document.getElementById("bgimage");
+    bgimage.setAttribute(
+        "style",
+        `background-image: url(file:///tmp/wallpaper.png?v=${count})`
+    );
+    count += 1;
+    document
+        .getElementsByTagName("body")[0]
+        .setAttribute("style", "transition: 0.3s; opacity: 1;");
 }
 
 /**
@@ -85,7 +83,8 @@ function main() {
 
     event = require(__dirname + "/js/events.js");
     emitter = event.startListeners();
-    emitter.on("space-change", changeWallpaper);
+    emitter.on("space-change", darkenMenubar);
+    emitter.on("reload-background", reloadBackground);
 
     // Require all the important modules.
     require(__dirname + "/js/activation.js").init(emitter);
