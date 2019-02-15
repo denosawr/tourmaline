@@ -4,6 +4,7 @@ node_modules/
 # swift (tourmaline-helper)
 tourmaline-helper/.build
 tourmaline-helper/DerivedData
+tourmaline-helper/tourmaline-helper.app/Contents/MacOS/tourmaline-helper
 
 # build folder
 build/

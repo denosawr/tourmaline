@@ -52,6 +52,11 @@ function createWindow() {
     return win;
 }
 
+ipcMain.on("quit", () => {
+    console.log("Got quit event.");
+    app.quit();
+});
+
 app.on("ready", createWindow);
 app.on("will-quit", event => {
     console.log("Will quit.");

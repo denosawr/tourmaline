@@ -7,7 +7,7 @@ const cp = require("child_process");
 const path = require("path");
 const utils = require(__dirname + "/utils.js");
 const { ipcRenderer } = require("electron");
-const process = require("electron").remote.process;
+const { dialog, process } = require("electron").remote;
 
 const expressApp = require("express")();
 const http = require("http").Server(expressApp);
@@ -105,6 +105,20 @@ module.exports = {
 
             socket.on("reloadBackground", function(msg) {
                 emit("reload-background", msg)();
+            });
+
+            socket.on("noAccessibility", function() {
+                // We don't have accessibility. This... isn't a great situation.
+                console.log("No Accessibility.");
+                socket.emit("shutdown");
+                dialog.showMessageBox(null, {
+                    type: "error",
+                    title: "Enable Accessibility permissions!",
+                    message:
+                        "Please give tourmaline-helper permissions to use the Accessibility APIs in order to function. " +
+                        "When you've done that, just relaunch Tourmaline.",
+                });
+                ipcRenderer.send("quit");
             });
         });
 

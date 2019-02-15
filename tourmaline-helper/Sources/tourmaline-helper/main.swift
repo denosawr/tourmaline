@@ -26,19 +26,6 @@ class Manager: SocketManager {
 let manager = Manager(socketURL: URL(string:"http://localhost:3000")!)
 let socket = manager.defaultSocket
 
-extension NSImage {
-    func base64String() -> String? {
-        guard
-            let bits = self.representations.first as? NSBitmapImageRep,
-            let data = bits.representation(using: .png, properties: [:])
-            else {
-                return nil
-        }
-        
-        return "data:image/png;base64,\(data.base64EncodedString())"
-    }
-}
-
 
 /**
  Saves the current desktop wallpaper to /tmp/wallpaper.png.
@@ -305,11 +292,28 @@ DispatchQueue.global(qos: .background).async {
 }
 
 
+/**
+ check if user has enabled the Accessibility API for tourmaline in System Preferences.
+ - attention: If the check fails, the application will emit a signal via the socket and then exit.
+ */
+func checkForPermissions() {
+    let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
+    if !AXIsProcessTrustedWithOptions(options) {
+        NSLog("No accessibility API permissions, exiting")
+        socket.emit("noAccessibility")
+    }
+}
+
+
 func createSocket() {
     socket.connect()
     // when the socket disconnects. this shouldn't happen; instead, on a disconnection, `shutdown` should first be called.
     socket.on(clientEvent: .disconnect) { (dataArray, ack) in
         NSLog("Disconnected.")
+    }
+    socket.on(clientEvent: .connect) { (dataArray, ack) in
+        NSLog("Connected.")
+        checkForPermissions()
     }
     socket.on("startSelectionListener") { (dataArray, ack) in
         detectSelectionChange = true
@@ -320,7 +324,7 @@ func createSocket() {
         detectSelectionChangeSetup = false
     }
     socket.on("getWallpaper") { (dataArray, ack) in
-        updateWallpaper()
+        let _ = updateWallpaper()
     }
     // shutdown. called on main app exit
     socket.on("shutdown") { (dataArray, ack) in
@@ -329,21 +333,7 @@ func createSocket() {
     }
 }
 
-
-/**
- check if user has enabled the Accessibility API for tourmaline in System Preferences.
- - attention: If the check fails, the application will emit a signal via the socket and then exit.
- */
-func checkForPermissions() {
-    let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
-    if !AXIsProcessTrustedWithOptions(options) {
-        NSLog("No accessibility API permissions, exiting")
-        socket.emit("no-accessibility")
-        exit(0)
-    }
-}
-
-updateWallpaper()
+let _ = updateWallpaper()
 
 // create application delegate - required to use notification centre
 let app = NSApplication.shared
@@ -351,7 +341,5 @@ let delegate = AppDelegate()
 app.delegate = delegate
 
 createSocket()
-
-checkForPermissions()
 
 app.run()
