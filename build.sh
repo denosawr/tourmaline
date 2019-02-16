@@ -11,6 +11,9 @@ rm -r build/tourmaline.app
 mv tourmaline-darwin-x64/tourmaline.app build/tourmaline.app
 rm -r tourmaline-darwin-x64
 
+# make diskusage work - copy over build folder
+cp -r node_modules/diskusage/build build/tourmaline.app/Contents/Resources/app/node_modules/diskusage/build
+
 printf "\e[36mCompiling Tourmaline Helper app...\e[90m\n"
 # compile tourmaline-helper
 cd tourmaline-helper
