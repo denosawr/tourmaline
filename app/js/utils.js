@@ -1,17 +1,141 @@
 const fs = require("fs");
 const cp = require("child_process");
+const path = require("path");
 const { ipcRenderer } = require("electron");
+const stripJsonComments = require("strip-json-comments");
+
+const CONFIG_PATH = path.join(process.env.HOME, ".config/tourmaline.json");
 
 let processHandlers = {};
+let config = {};
+defaultConfig = JSON.parse(
+    stripJsonComments(
+        fs.readFileSync(
+            path.join(__dirname, "../../default-config.json"),
+            "utf8"
+        )
+    )
+);
+
+let generalCSSVariables = {};
+let pluginCSSVariables = {};
+
+function recurseThroughDict(obj, prefix) {
+    if (!prefix) prefix = "";
+
+    let items = {};
+
+    for (let item in obj) {
+        if (typeof obj[item] == "object") {
+            items = Object.assign(
+                {},
+                items,
+                recurseThroughDict(
+                    obj[item],
+                    prefix + (prefix ? "-" : "") + item
+                )
+            );
+        } else {
+            items[prefix + (prefix ? "-" : "") + item] = obj[item];
+        }
+    }
+    return items;
+}
 
 module.exports = {
+    log: function(moduleName) {
+        function outputString(args) {
+            return "%c" + moduleName + ":";
+        }
+
+        this.debug = (...args) => {
+            console.debug(outputString(args), "background: #CCC", ...args);
+        };
+        this.log = (...args) => {
+            console.log(outputString(args), "background: #CCC", ...args);
+        };
+        this.info = (...args) => {
+            console.info(outputString(args), "background: #00B600", ...args);
+        };
+        this.warn = (...args) => {
+            console.warn(
+                outputString(args),
+                "color: black, background: #FBCEB1",
+                ...args
+            );
+        };
+        this.error = (...args) => {
+            console.error(
+                outputString(args),
+                "color: gray, background: #DC143C",
+                ...args
+            );
+        };
+    },
+
+    loadConfig: function() {
+        if (!fs.existsSync(CONFIG_PATH)) {
+            fs.copyFileSync(
+                path.resolve(__dirname, "../../default-config.json"),
+                CONFIG_PATH
+            );
+        }
+        config = JSON.parse(
+            stripJsonComments(fs.readFileSync(CONFIG_PATH, "utf8"))
+        );
+
+        // // Inject variables
+        // let configVariables = recurseThroughDict(config);
+
+        // // Remove space-specific config - just clogs up the CSS var space
+        // configVariables = Object.keys(configVariables)
+        //     .filter(key => !key.startsWith("spaces-"))
+        //     .reduce((obj, key) => {
+        //         obj["cfg-" + key] = configVariables[key];
+        //         return obj;
+        //     }, {});
+
+        // module.exports.addCSSVariables(configVariables);
+        module.exports.updateCurrentSpace("default");
+    },
+
+    updateCurrentSpace(desktopWallpaper) {
+        if (!(desktopWallpaper in config.spaces)) {
+            // There is no entry for this wallpaper, revert to default
+            desktopWallpaper = "default";
+        }
+
+        let configVariables = recurseThroughDict(
+            config.spaces[desktopWallpaper]
+        );
+        configVariables = Object.keys(configVariables)
+            .filter(key => !key.startsWith("spaces-"))
+            .reduce((obj, key) => {
+                obj["cfg-" + key] = configVariables[key];
+                return obj;
+            }, {});
+
+        log.log(configVariables);
+    },
+
+    get: function(path, default_) {
+        let o = config;
+        for (let name of path) {
+            o = config[name];
+            if (!o) {
+                return default_;
+            }
+        }
+        return o;
+    },
+
     createHelper: function(name, handler, args) {
         let processValue = ipcRenderer.sendSync("create-helper-process", [
             name,
             args,
         ]);
         processHandlers[processValue] = handler;
-        console.log(processValue, name);
+        log.log(processValue, name);
 
         return processValue;
     },
@@ -35,6 +159,7 @@ module.exports = {
             ? productionAppPath
             : productionBinPath;
     },
+
     startHelperHooks: function() {
         ipcRenderer.on("helper-process-message", (event, arg) => {
             let processValue = arg[0],
@@ -47,6 +172,7 @@ module.exports = {
             // delete the handler, because the process is now dead
         });
     },
+
     /**
      * Creates a handler to log childprocess errors to console.
      * @param {EventEmitter} cp
@@ -54,12 +180,10 @@ module.exports = {
      */
     errorHandler: function(cp, name) {
         cp.on("error", err => {
-            console.error(`Error in child process ${name}: ${err}`);
+            log.error(`Error in child process ${name}: ${err}`);
         });
         cp.stderr.on("data", data => {
-            console.error(
-                `stderr in child process ${name}: ${data.toString()}`
-            );
+            log.error(`stderr in child process ${name}: ${data.toString()}`);
         });
     },
 
@@ -88,7 +212,7 @@ module.exports = {
     },
 
     /**
-     * Injects custom CSS to the webpage.
+     * Injects custom CSS to the application.
      * @param {string} cssToInject
      */
     injectCSS: function(cssToInject) {
@@ -98,15 +222,34 @@ module.exports = {
     },
 
     /**
-     * Change root CSS variables.
+     * Change root CSS variables. Adds it to a global store.
      * @param {Object} cssVariables variables to set with CSS.
      */
-    injectCSSVariables: function(cssVariables) {
-        for (let varName in cssVariables) {
-            document.documentElement.style.setProperty(
-                "--" + varName,
-                cssVariables[varName]
-            );
+    addCSSVariables: function(cssVariables) {
+        for (let variable in cssVariables) {
+            generalCSSVariables[variable] = cssVariables[variable];
+        }
+
+        module.exports.injectCSSVariables();
+    },
+
+    addPluginConfig: function() {},
+
+    /**
+     * Inject CSS variables to the document.
+     * You shouldn't need to use this function.
+     */
+    injectCSSVariables: function() {
+        document.documentElement.removeAttribute("style"); // clear all styles first
+
+        // Inject all styles; include both general and plugin-specific CSS vars
+        for (let variableList of [generalCSSVariables, pluginCSSVariables]) {
+            for (let varName in variableList) {
+                document.documentElement.style.setProperty(
+                    "--" + varName,
+                    variableList[varName]
+                );
+            }
         }
     },
 
@@ -134,7 +277,7 @@ module.exports = {
 
     /**
      * Get height of macOS default menu bar.
-     * For some weird reason, this function when called from the renderer.
+     * Just a constant; I think the menu bar height is constant.
      * @returns {number}
      */
     menuBarHeight: function() {
@@ -145,3 +288,5 @@ module.exports = {
         */
     },
 };
+
+const log = new module.exports.log("utils");
