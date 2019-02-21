@@ -15,6 +15,8 @@ const io = require("socket.io")(http);
 
 const psList = require("ps-list");
 
+const log = new utils.log("events");
+
 // defining some important global variables
 let windowChangeProcess;
 let socket;
@@ -42,7 +44,7 @@ function emit() {
 }
 
 function mouseover() {
-    console.log("mouseover");
+    log.debug("mouseover");
     global.variables.activated = true;
     if (global.variables.selected) {
         return;
@@ -85,9 +87,10 @@ module.exports = {
             socket = socket_;
 
             socket.emit("getWallpaper");
-            console.log("connected to a new socket.");
+            log.log("connected to a new socket.");
+            emit("reload-background")();
             socket.on("disconnect", function() {
-                console.warn("user disconnected");
+                log.warn("user disconnected");
             });
 
             socket.on("windowChange", function(msg) {
@@ -109,7 +112,7 @@ module.exports = {
 
             socket.on("noAccessibility", function() {
                 // We don't have accessibility. This... isn't a great situation.
-                console.log("No Accessibility.");
+                log.log("No Accessibility.");
                 socket.emit("shutdown");
                 dialog.showMessageBox(null, {
                     type: "error",
@@ -123,12 +126,23 @@ module.exports = {
         });
 
         http.listen(3000, function() {
-            console.log("Listening on *:3000");
+            log.log("Listening on *:3000");
         });
 
         // Start tourmaline helper, if not already started.
         let arguments_ = Array.from(process.argv);
-        console.log(path.join(__dirname, "../../../../Frameworks/helper.app"));
+        log.log(path.join(__dirname, "../../../../Frameworks/helper.app"));
+        let helperPath = path.join(
+            __dirname,
+            "../../../../Frameworks/helper.app"
+        );
+        if (!fs.existsSync(helperPath)) {
+            helperPath = path.join(
+                __dirname,
+                "../../tourmaline-helper/tourmaline-helper.app"
+            );
+        }
+        log.log(helperPath);
         if (!arguments_ || !arguments_.includes("--no-launch-helper")) {
             let objectList = psList().then(options => {
                 let alreadyRunning = false;
@@ -139,16 +153,10 @@ module.exports = {
                 }
 
                 if (!alreadyRunning) {
-                    console.log(
+                    log.log(
                         "No existing tourmaline-helper running, will spawn another."
                     );
-                    cp.spawn("open", [
-                        "-a",
-                        path.join(
-                            __dirname,
-                            "../../../../Frameworks/helper.app"
-                        ),
-                    ]);
+                    cp.spawn("open", ["-a", helperPath]);
                 }
             });
         }

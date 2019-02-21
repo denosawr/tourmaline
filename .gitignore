@@ -13,3 +13,5 @@ build/
 .idea/
 .DS_Store
 .vscode/
+
+yarn-error\.log

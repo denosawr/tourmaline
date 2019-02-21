@@ -1,0 +1,39 @@
+// Configuration for Tourmaline (https://github.com/denosawr/tourmaline). JSONC - comments are filtered out.
+
+{
+    "spaces": {
+        // "default" is the default config applied to all spaces. For a specific space,
+        // use the *desktop background image name* (without path). For instance:
+        // if the wallpaper of the space is at "/Users/user/Pictures/wallpaper.png",
+        // the key should be "wallpaper.png".
+
+        "default": {
+            // Background of the bar to show when *not* activated.
+            // Note that 'transparent' will display the desktop wallpaper.
+            "background": "transparent",
+
+            // Foreground text colour.
+            "foreground": "white",
+
+            // Font for foreground - will *not* affect menubar.
+            //   "-apple-system" for San Francisco
+            "font": "-apple-system",
+
+            // Widget config.
+            "widgets": {
+                "menubar": {
+                    // Color of background for selected menu item
+                    "selectedBackground": "rgba(138, 55, 173, 0.6)"
+                },
+                "systeminfo": {
+                    // Refresh rate of the stats counter in ms.
+                    "refreshInterval": 3000
+                }
+            }
+        }
+    },
+
+    // Indicator of current space on top left; "indicator" for space number
+    // or any string
+    "spaceIndicator": "indicator"
+}

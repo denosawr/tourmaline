@@ -3,25 +3,30 @@ const disk = require("diskusage");
 const path = require("path");
 const utils = require(path.resolve(__dirname, "../js/utils.js"));
 
+const log = new utils.log("systeminfo");
+
 let infoBar, localizedNameHolder, cpuHolder, memHolder, diskHolder;
 
 function updateHolders() {
     cpuStat.usagePercent((err, percent, _) => {
         if (err) {
-            console.error("Error getting CPU usage:", err);
+            log.error("Error getting CPU usage:", err);
         }
         global.widgets.cpuHolder.textContent = `cpu ${Math.round(percent)}%`;
     }, 3000);
     disk.check("/", (err, info) => {
         if (err) {
-            console.error("Error getting disk usage:", err);
+            log.error("Error getting disk usage:", err);
         }
         global.widgets.diskHolder.textContent = `dsk ${(
             (info.total - info.free) /
             1073741824
         ).toFixed(1)}GB`;
     });
-    setTimeout(updateHolders, 3000);
+    setTimeout(
+        updateHolders,
+        utils.get(["widgetConfigs", "systeminfo", "refreshInterval"], 3000)
+    );
 }
 
 module.exports.positionBar = function() {

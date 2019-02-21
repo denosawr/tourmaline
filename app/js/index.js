@@ -7,6 +7,8 @@ const fs = require("fs");
 const path = require("path");
 const utils = require(path.resolve(__dirname, "js/utils.js"));
 
+const log = new utils.log("main");
+
 let event, emitter; // will be imported/defined later in main()
 let count = 0;
 
@@ -31,9 +33,9 @@ function loadPlugin(pluginName) {
  * Finds all the plugins and loads them
  */
 function findPlugins() {
-    fs.readdir(__dirname + "/widgets", (err, files) => {
+    fs.readdirSync(__dirname + "/widgets", (err, files) => {
         if (err) {
-            console.error("Unable to load modules:", err);
+            log.error("Unable to load modules:", err);
             return;
         }
         files.forEach(loadPlugin);
@@ -50,7 +52,7 @@ function darkenMenubar() {
 }
 
 function reloadBackground() {
-    console.log("reloadBackground");
+    log.log("reloadBackground");
     let bgimage = document.getElementById("bgimage");
     bgimage.setAttribute(
         "style",
@@ -72,7 +74,7 @@ function main() {
     global.widgets.middleBar = document.getElementById("middle");
 
     // set a bunch of CSS variables
-    utils.injectCSSVariables({
+    utils.addCSSVariables({
         "screen-width": screen.width + "px",
         "screen-height": screen.height + "px",
         "window-height": window.outerHeight + "px",
@@ -89,6 +91,24 @@ function main() {
     // Require all the important modules.
     require(__dirname + "/js/activation.js").init(emitter);
 
-    findPlugins(); // find & load the plugins
+    // Find all plugins from dir
+    let plugins = fs
+        .readdirSync(__dirname + "/widgets")
+        .filter(x => x.endsWith(".js")) // Remove non-javascript files
+
+        // Import all the plugins
+        .map(x => require(__dirname + "/widgets/" + x));
+
+    // Load plugin config & CSS
+    for (let plugin of plugins) {
+        utils.addPluginConfig(plugin);
+        utils.injectCSS(plugin.style);
+    }
+    utils.loadConfig();
+
+    // init plugins
+    for (let plugin of plugins) {
+        plugin.init(emitter);
+    }
 }
 window.onload = main;
