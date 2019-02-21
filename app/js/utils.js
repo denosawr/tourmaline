@@ -108,14 +108,32 @@ module.exports = {
         let configVariables = recurseThroughDict(
             config.spaces[desktopWallpaper]
         );
-        configVariables = Object.keys(configVariables)
-            .filter(key => !key.startsWith("spaces-"))
-            .reduce((obj, key) => {
-                obj["cfg-" + key] = configVariables[key];
-                return obj;
-            }, {});
 
-        log.log(configVariables);
+        let defaultConfigVariables = recurseThroughDict(
+            defaultConfig.spaces[desktopWallpaper]
+        );
+
+        let pluginCSSVariables = {};
+        for (let key of Object.keys(defaultConfigVariables)) {
+            pluginCSSVariables["cfg-" + key] =
+                key in configVariables
+                    ? configVariables[key] // if key has user defined value, use that
+                    : defaultConfigVariables[key]; // else use default
+        }
+
+        // pluginCSSVariables = Object.keys(defaultConfigVariables).reduce(
+        //     (obj, key) => {
+        //         log.log(obj, key);
+        //         obj["cfg-" + key] =
+        //             key in configVariables
+        //                 ? configVariables[key]
+        //                 : defaultConfigVariables[key];
+        //         return obj;
+        //     },
+        //     {}
+        // );
+
+        log.log(pluginCSSVariables);
     },
 
     get: function(path, default_) {
