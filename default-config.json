@@ -1,4 +1,5 @@
-// Configuration for Tourmaline (https://github.com/denosawr/tourmaline). JSONC - comments are filtered out.
+// Configuration for Tourmaline (https://github.com/denosawr/tourmaline).
+// JSONC - comments are filtered out.
 
 {
     "spaces": {
@@ -25,7 +26,7 @@
                     // Color of background for selected menu item
                     "selectedBackground": "rgba(138, 55, 173, 0.6)"
                 },
-                "systeminfo": {
+                "infobar": {
                     // Refresh rate of the stats counter in ms.
                     "refreshInterval": 3000
                 }

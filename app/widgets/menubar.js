@@ -67,6 +67,9 @@ module.exports = {
     // Name. Is used for the config setting
     name: "menubar",
 
+    // Description. Not used, but nice to have.
+    description: "Shows the menubar items on mouse hover.",
+
     // The default config. This must feature all available config settings.
     config: {
         selectedBackground: "rgba(138, 55, 173, 0.6)",
@@ -104,11 +107,11 @@ module.exports = {
 
         global.widgets.leftBar.appendChild(global.widgets.menuBar);
 
-        systemInfoWidget = require(__dirname + "/systeminfo.js");
+        systemInfoWidget = require(__dirname + "/infobar.js");
         systemInfoWidget.activateBar();
     },
 
-    // CSS to inject.
+    /// CSS to inject.
     style: `
         #localizedNameContainer {
             font-weight: bold;

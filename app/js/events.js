@@ -171,7 +171,7 @@ module.exports = {
         document.body.onmouseout = null;
         document.body.onmouseover = null;
         // windowChangeProcess.kill();
-        utils.killHelper(windowChangeProcess);
+        // utils.killHelper(windowChangeProcess);
     },
 };
 

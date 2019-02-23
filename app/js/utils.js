@@ -6,6 +6,7 @@ const stripJsonComments = require("strip-json-comments");
 
 const CONFIG_PATH = path.join(process.env.HOME, ".config/tourmaline.json");
 
+let currentDesktopWallpaper = "default";
 let processHandlers = {};
 let config = {};
 defaultConfig = JSON.parse(
@@ -43,36 +44,44 @@ function recurseThroughDict(obj, prefix) {
 }
 
 module.exports = {
+    /**
+     * Logging class. Has the same output functions as console, but
+     * prepends moduleName.
+     * @constructor
+     * @param {string} moduleName name of module. Will be prepended to all output
+     */
     log: function(moduleName) {
-        function outputString(args) {
-            return "%c" + moduleName + ":";
-        }
+        this.outputString = "%c" + moduleName + ":";
 
         this.debug = (...args) => {
-            console.debug(outputString(args), "background: #CCC", ...args);
+            console.debug(outputString, "background: #CCC", ...args);
         };
         this.log = (...args) => {
-            console.log(outputString(args), "background: #CCC", ...args);
+            console.log(outputString, "background: #CCC", ...args);
         };
         this.info = (...args) => {
-            console.info(outputString(args), "background: #00B600", ...args);
+            console.info(outputString, "background: #00B600", ...args);
         };
         this.warn = (...args) => {
             console.warn(
-                outputString(args),
+                outputString,
                 "color: black, background: #FBCEB1",
                 ...args
             );
         };
         this.error = (...args) => {
             console.error(
-                outputString(args),
+                outputString,
                 "color: gray, background: #DC143C",
                 ...args
             );
         };
     },
 
+    /**
+     * Loads the config file.
+     * Note: access config file data with module.exports.get()
+     */
     loadConfig: function() {
         if (!fs.existsSync(CONFIG_PATH)) {
             fs.copyFileSync(
@@ -99,11 +108,17 @@ module.exports = {
         module.exports.updateCurrentSpace("default");
     },
 
+    /**
+     * Function to be called internally when current space changes.
+     * Will update CSS and config variables.
+     * @param {string} desktopWallpaper desktop wallpaper name, passed from helper
+     */
     updateCurrentSpace(desktopWallpaper) {
         if (!(desktopWallpaper in config.spaces)) {
             // There is no entry for this wallpaper, revert to default
             desktopWallpaper = "default";
         }
+        currentDesktopWallpaper = desktopWallpaper;
 
         let configVariables = recurseThroughDict(
             config.spaces[desktopWallpaper]
@@ -136,59 +151,41 @@ module.exports = {
         log.log(pluginCSSVariables);
     },
 
-    get: function(path, default_) {
-        let o = config;
-        for (let name of path) {
-            o = config[name];
-            if (!o) {
-                return default_;
+    /**
+     * Loops through object, given keys.
+     * loopThroughObjByKey(o, ["test", "hi"]) = o.test.hi
+     * @throws if key is not found
+     * @param {object} obj object to recurse through.
+     * @param  {string[]} keys the keys to work through.
+     * @returns key if found.
+     */
+    loopThroughObjByKey(obj, keys) {
+        for (let key of keys) {
+            obj = config[name];
+            if (!obj) {
+                throw "Key not found.";
             }
         }
-        return o;
+        return obj;
     },
 
-    createHelper: function(name, handler, args) {
-        let processValue = ipcRenderer.sendSync("create-helper-process", [
-            name,
-            args,
-        ]);
-        processHandlers[processValue] = handler;
-        log.log(processValue, name);
-
-        return processValue;
-    },
-
-    killHelper: function(processValue) {
-        ipcRenderer.send("kill-helper-process", processValue);
-        delete processHandlers[processValue];
-    },
-
-    pathToHelper: function() {
-        return "/Users/denosawr/Documents/Programming/tourmaline/app/tourmaline-helper/tourmaline-helper-app";
-        const productionAppPath = path.join(
-            __dirname,
-            "../tourmaline-helper/tourmaline-helper-app"
-        );
-        const productionBinPath = path.join(
-            process.cwd(),
-            "../Frameworks/tourmaline-helper-app"
-        );
-        return fs.existsSync(productionAppPath)
-            ? productionAppPath
-            : productionBinPath;
-    },
-
-    startHelperHooks: function() {
-        ipcRenderer.on("helper-process-message", (event, arg) => {
-            let processValue = arg[0],
-                data = arg[1];
-            processHandlers[processValue](data);
-        });
-
-        ipcRenderer.on("helper-process-exit", (event, arg) => {
-            delete processHandlers[arg];
-            // delete the handler, because the process is now dead
-        });
+    /**
+     * Retrieves config option from the loaded config. Will fallback to default.
+     * @param {...string} keys the path to the config value, relative to space.
+     * @returns {any} the value, will fallback to defaultConfig.
+     */
+    get: function(...keys) {
+        try {
+            return loopThroughObjByKey(
+                config.spaces[currentDesktopWallpaper],
+                keys
+            );
+        } catch (e) {
+            return loopThroughObjByKey(
+                defaultConfig.spaces[currentDesktopWallpaper],
+                keys
+            );
+        }
     },
 
     /**
@@ -295,16 +292,13 @@ module.exports = {
 
     /**
      * Get height of macOS default menu bar.
-     * Just a constant; I think the menu bar height is constant.
+     * I think the menu bar height is constant.
      * @returns {number}
      */
     menuBarHeight: function() {
         return 22;
-        /*
-        const application = $.NSApplication("sharedApplication");
-        return application("mainMenu")("menuBarHeight");
-        */
     },
 };
 
+// so utils can also log.
 const log = new module.exports.log("utils");

@@ -120,7 +120,8 @@ func getMenuItems() -> [AXUIElement] {
     var AXMenuReference: AnyObject?
     AXUIElementCopyAttributeValue(AXRunningApplication, "AXMenuBar" as CFString, &AXMenuReference)
     guard let AXMenu = AXMenuReference else {
-        // NSLog("AXRunningApplication has no AXMenuBar") // some apps are like this so we don't want spam
+        // NSLog("AXRunningApplication has no AXMenuBar") // some apps are like this so we don't want spam.
+        //Shouldn't happen anymore, as we use menubarOwningApplication.
         return []
     }
     
