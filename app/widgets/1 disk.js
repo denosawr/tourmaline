@@ -29,7 +29,7 @@ function update() {
 module.exports = {
     name: NAME,
 
-    description: "Shows disk usage in leftbar",
+    description: "Shows disk usage.",
 
     config: {
         refreshRate: 2000,

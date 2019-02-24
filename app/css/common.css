@@ -24,14 +24,10 @@
     z-index: 1;
     background: #333;
 
-    /*-webkit-mask-image: linear-gradient(to right, black var(--mask-location), transparent calc(var(--mask-location) + 100px));*/
     transition: -webkit-mask-image 1s;
 }
 
 body {
-    /*background: url(file:///Users/denosawr/Pictures/deer.jpg);
-  background-size: var(--screen-width);
-  background-position-x: var(--overflow);*/
     margin: 0;
     color: white;
     overflow: hidden;
@@ -53,9 +49,6 @@ body {
         calc(var(--left-margin) + var(--overflow));
     display: flex;
     flex-direction: row;
-    /*justify-content: space-between;
-  align-content: space-between;
-  */
     justify-content: flex-start;
     align-items: center;
     z-index: 2;
@@ -72,6 +65,7 @@ body {
 }
 
 #right {
+    margin-right: -25px;
     flex: 1;
     justify-content: flex-end;
 }
@@ -88,7 +82,7 @@ body {
 #leftBar {
     position: absolute;
     z-index: 100;
-    opacity: 0.7;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .leftBarItem {
@@ -110,6 +104,7 @@ body {
     padding-left: 9.25px;
     padding-right: 9.25px;
     transition: opacity 0.5s;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .widgetBarItem.itemActivated {

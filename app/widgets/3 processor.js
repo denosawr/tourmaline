@@ -29,7 +29,7 @@ function update() {
 module.exports = {
     name: NAME,
 
-    description: "Shows processor utilisation in leftbar",
+    description: "Shows processor utilisation.",
 
     config: {
         refreshRate: 2000,

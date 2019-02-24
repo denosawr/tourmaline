@@ -4,9 +4,8 @@ const cp = require("child_process");
 // tourmaline-specific modules
 const utils = require(path.resolve(__dirname, "../js/utils.js"));
 
-const NAME = "memoryusage";
-const COMMAND = "sh scripts/mem.sh";
-const FORMAT = `<i class="fas fa-memory"></i>&nbsp&nbsp{}GB`;
+const NAME = "networkusage";
+const COMMAND = "sh scripts/network.sh";
 
 const log = new utils.log(NAME);
 
@@ -14,9 +13,9 @@ function update() {
     let process = cp.spawn(COMMAND, [], { shell: true });
 
     process.stdout.on("data", data => {
-        data = parseFloat(data.toString()).toFixed(1);
+        data = data.toString();
 
-        global.widgets[NAME].innerHTML = FORMAT.replace("{}", data);
+        global.widgets[NAME].textContent = data;
     });
 
     process.on("close", () => {
@@ -29,14 +28,16 @@ function update() {
 module.exports = {
     name: NAME,
 
-    description: "Shows used RAM.",
+    description: "Shows network usage.",
 
     config: {
-        refreshRate: 2000,
+        refreshRate: 1000,
     },
 
     init: function(emitter) {
-        global.widgets[NAME] = utils.makeAttachedElement("left");
+        global.widgets[NAME] = utils.makeAttachedElement("right", {
+            textContent: "↓ -- ↑ --",
+        });
         update();
     },
 };

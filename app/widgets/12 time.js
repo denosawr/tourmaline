@@ -13,11 +13,11 @@ let prevDateString = "";
  */
 function setTimeWidget() {
     let dateString =
+        '<span style="color: white;">' +
         getTimeString() +
+        "</span>" +
         "&nbsp&nbsp&nbsp" +
-        '<span style="opacity:0.7;">' +
-        strftime("%o of %b") +
-        "</span>";
+        strftime("%o of %b");
     if (dateString != prevDateString) {
         global.widgets.time.innerHTML = dateString;
         prevDateString = dateString;
@@ -29,14 +29,11 @@ module.exports = {
     init: function() {
         global.widgets.time = utils.makeAttachedElement("right", {
             id: "timeWidget",
+            style: {
+                "padding-right": 0,
+            },
         });
 
         setTimeWidget();
     },
-
-    style: `
-        #timeWidget {
-            margin-right: -25px;
-            padding-right: 0;
-        }`,
 };

@@ -30,14 +30,14 @@ function update() {
 module.exports = {
     name: NAME,
 
-    description: "Spotify status in leftbar",
+    description: "Spotify status.",
 
     config: {
         refreshRate: 2000,
     },
 
     init: function(emitter) {
-        global.widgets[NAME] = utils.makeAttachedElement("centre");
+        global.widgets[NAME] = utils.makeAttachedElement("left");
         update();
     },
 };
