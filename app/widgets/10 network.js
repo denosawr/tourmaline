@@ -31,7 +31,7 @@ module.exports = {
     description: "Shows network usage.",
 
     config: {
-        refreshRate: 1000,
+        refreshRate: 0,
     },
 
     init: function(emitter) {
