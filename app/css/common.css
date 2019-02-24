@@ -84,3 +84,34 @@ body {
 #top-bar * {
     pointer-events: none;
 }
+
+#leftBar {
+    position: absolute;
+    z-index: 100;
+    opacity: 0.7;
+}
+
+.leftBarItem {
+    padding-left: 9.5px;
+    padding-right: 9.5px;
+    transition: margin-top 0.15s;
+}
+
+#leftBar.itemActivated {
+    margin-top: 22px;
+}
+
+#leftBar.itemDeactivated {
+    transition: margin-top 0.15s;
+    margin-top: 0px;
+}
+
+.widgetBarItem {
+    padding-left: 9.25px;
+    padding-right: 9.25px;
+    transition: opacity 0.5s;
+}
+
+.widgetBarItem.itemActivated {
+    opacity: 0;
+}

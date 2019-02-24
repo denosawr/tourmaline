@@ -15,7 +15,7 @@ let count = 0;
 // Global objects, accessible inside widgets/modules
 global.variables = {};
 global.widgets = {};
-global.processes = {};
+global.plugins = {};
 
 /**
  * Loads a plugin and passes in emitter
@@ -69,9 +69,9 @@ function reloadBackground() {
  */
 function main() {
     // populate global.widgets
-    global.widgets.leftBar = document.getElementById("left");
+    global.widgets.leftBarElement = document.getElementById("left");
     global.widgets.rightBar = document.getElementById("right");
-    global.widgets.middleBar = document.getElementById("middle");
+    global.widgets.centreBar = document.getElementById("middle");
 
     // set a bunch of CSS variables
     utils.addCSSVariables({
@@ -91,23 +91,36 @@ function main() {
     // Require all the important modules.
     require(__dirname + "/js/activation.js").init(emitter);
 
-    // Find all plugins from dir
-    let plugins = fs
-        .readdirSync(__dirname + "/widgets")
-        .filter(x => x.endsWith(".js")) // Remove non-javascript files
+    // Load menubar and infobar
+    let requiredPlugins = ["menubar", "leftbar"].map(x =>
+        require(__dirname + "/js/" + x)
+    );
 
-        // Import all the plugins
-        .map(x => require(__dirname + "/widgets/" + x));
+    // Find all plugins from dir
+    let plugins = requiredPlugins.concat(
+        // first load the requiredPlugins in that order
+        fs
+            .readdirSync(__dirname + "/widgets")
+            .filter(x => x.endsWith(".js")) // Remove non-javascript files
+
+            // Import all the plugins
+            .map(x => require(__dirname + "/widgets/" + x))
+            .sort()
+    );
 
     // Load plugin config & CSS
     for (let plugin of plugins) {
         utils.addPluginConfig(plugin);
-        utils.injectCSS(plugin.style);
+
+        if (plugin.style) {
+            utils.injectCSS(plugin.style);
+        }
     }
     utils.loadConfig();
 
     // init plugins
     for (let plugin of plugins) {
+        global.plugins[plugin.name] = plugin;
         plugin.init(emitter);
     }
 }

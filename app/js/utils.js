@@ -249,7 +249,7 @@ module.exports = {
     },
 
     addPluginConfig: function(plugin) {
-        defaultConfig.spaces.default.widgets[plugin.name] = plugin.config;
+        defaultConfig.spaces.default.plugins[plugin.name] = plugin.config;
     },
 
     /**
@@ -289,6 +289,33 @@ module.exports = {
                 element[key] = attrs[key];
             }
         }
+        return element;
+    },
+
+    /**
+     * Makes a div with given classes, and adds it to the global widget.
+     * @param {str} side Side: one of {left, center/centre, right}
+     * @param {obj} args Args. Will be passed through to makeElement.
+     */
+    makeAttachedElement: function(side, args) {
+        if (!["right", "center", "centre", "left"].includes(side)) {
+            throw "Invalid side: " +
+                side +
+                ". Please choose from right, centre/center, left";
+        }
+
+        side = side == "center" ? "centre" : side; // I speak *proper* English, thank you very much.
+
+        if (!args) args = {};
+        if (!args.class) args.class = [];
+        args.class.push(
+            ...(side == "left"
+                ? ["leftBarItem"]
+                : ["widgetBarItem", "itemDeactivated"])
+        );
+
+        let element = module.exports.makeElement("div", args);
+        global.widgets[side + "Bar"].appendChild(element);
         return element;
     },
 

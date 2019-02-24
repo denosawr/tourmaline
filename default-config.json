@@ -20,15 +20,15 @@
             //   "-apple-system" for San Francisco
             "font": "-apple-system",
 
-            // Widget config.
-            "widgets": {
+            // Plugin config.
+            "plugins": {
                 "menubar": {
                     // Color of background for selected menu item
                     "selectedBackground": "rgba(138, 55, 173, 0.6)"
                 },
-                "infobar": {
+                "diskusage": {
                     // Refresh rate of the stats counter in ms.
-                    "refreshInterval": 3000
+                    "refreshRate": 3000
                 }
             }
         }

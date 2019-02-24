@@ -28,13 +28,13 @@ function refreshMenuBarItems(data) {
 
     for (let item of menubarObjects.splice(1)) {
         let element = utils.makeElement("div", {
-            class: ["macMenuBarItem"],
+            class: ["menuBarItem"],
             textContent: item,
         });
         global.widgets.childMenuBar.appendChild(element);
     }
 
-    systemInfoWidget.positionBar();
+    global.plugins.leftbar.positionBar();
 }
 
 /**
@@ -46,17 +46,17 @@ function menuItemSelectionChange(data) {
     if (selectedElement == "////") {
         // nothing selected
 
-        utils.removeClassName("macMenuBarItemSelected");
+        utils.removeClassName("menuBarItemSelected");
         global.variablesselected = false;
     } else {
         // something selected!
 
-        let elements = document.getElementsByClassName("macMenuBarItem");
+        let elements = document.getElementsByClassName("menuBarItem");
         for (let element of elements) {
             if (element.textContent == selectedElement) {
-                element.classList.add("macMenuBarItemSelected");
+                element.classList.add("menuBarItemSelected");
             } else {
-                element.classList.remove("macMenuBarItemSelected");
+                element.classList.remove("menuBarItemSelected");
             }
         }
         global.variablesselected = true;
@@ -85,11 +85,11 @@ module.exports = {
 
         global.widgets.menuBar = utils.makeElement("div", {
             class: ["container"],
-            id: "macMenuBar",
+            id: "menuBar",
         });
 
         global.widgets.localizedNameHolder = utils.makeElement("div", {
-            class: ["macMenuBarItem"],
+            class: ["menuBarItem"],
             id: "localizedNameHolder",
             style: {
                 fontWeight: "bold",
@@ -99,16 +99,13 @@ module.exports = {
 
         global.widgets.childMenuBar = utils.makeElement("div", {
             id: "macChildMenuBar",
-            class: ["container", "macMenuBarChild", "itemDeactivated"],
+            class: ["container", "menuBarChild", "itemDeactivated"],
         });
 
         global.widgets.menuBar.appendChild(global.widgets.localizedNameHolder);
         global.widgets.menuBar.appendChild(global.widgets.childMenuBar);
 
-        global.widgets.leftBar.appendChild(global.widgets.menuBar);
-
-        systemInfoWidget = require(__dirname + "/infobar.js");
-        systemInfoWidget.activateBar();
+        global.widgets.leftBarElement.appendChild(global.widgets.menuBar);
     },
 
     /// CSS to inject.
@@ -117,22 +114,22 @@ module.exports = {
             font-weight: bold;
         }
 
-        .macMenuBarItem {
+        .menuBarItem {
             padding-left: 9.25px;
             padding-right: 9.25px;
         }
 
-        .macMenuBarItemSelected {
+        .menuBarItemSelected {
             background: rgba(138, 55, 173, 0.6);
         }
 
-        .macMenuBarChild {
+        .menuBarChild {
             margin-top: -22px;
             transition: margin-top 0.15s;
             white-space: nowrap;
         }
 
-        .macMenuBarChild.itemActivated {
+        .menuBarChild.itemActivated {
             margin-top: 0;
         }
 

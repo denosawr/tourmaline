@@ -19,40 +19,24 @@ function setTimeWidget() {
         strftime("%o of %b") +
         "</span>";
     if (dateString != prevDateString) {
-        global.widgets.timeWidget.innerHTML = dateString;
+        global.widgets.time.innerHTML = dateString;
         prevDateString = dateString;
     }
     setTimeout(setTimeWidget, 200);
 }
 
-let timewidget;
+module.exports = {
+    init: function() {
+        global.widgets.time = utils.makeAttachedElement("right", {
+            id: "timeWidget",
+        });
 
-module.exports.init = function() {
-    rightBar = document.getElementById("right");
+        setTimeWidget();
+    },
 
-    global.widgets.timeWidget = utils.makeElement("div", {
-        class: ["rightBarItem", "itemDeactivated"],
-        id: "timeWidget",
-    });
-
-    setTimeWidget();
-
-    rightBar.appendChild(global.widgets.timeWidget);
+    style: `
+        #timeWidget {
+            margin-right: -25px;
+            padding-right: 0;
+        }`,
 };
-
-utils.injectCSS(`
-#timeWidget {
-    margin-right: -25px;
-    padding-right: 0;
-}
-
-.rightBarItem {
-    padding-left: 9.25px;
-    padding-right: 9.25px;
-    transition: opacity 0.5s;
-}
-
-.rightBarItem.itemActivated {
-    opacity: 0;
-}
-`);
