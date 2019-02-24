@@ -81,7 +81,7 @@ function main() {
     });
 
     // hooks for helper processes
-    utils.startHelperHooks();
+    // utils.startHelperHooks();
 
     event = require(__dirname + "/js/events.js");
     emitter = event.startListeners();

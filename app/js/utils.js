@@ -54,24 +54,24 @@ module.exports = {
         this.outputString = "%c" + moduleName + ":";
 
         this.debug = (...args) => {
-            console.debug(outputString, "background: #CCC", ...args);
+            console.debug(this.outputString, "background: #CCC", ...args);
         };
         this.log = (...args) => {
-            console.log(outputString, "background: #CCC", ...args);
+            console.log(this.outputString, "background: #CCC", ...args);
         };
         this.info = (...args) => {
-            console.info(outputString, "background: #00B600", ...args);
+            console.info(this.outputString, "background: #00B600", ...args);
         };
         this.warn = (...args) => {
             console.warn(
-                outputString,
+                this.outputString,
                 "color: black, background: #FBCEB1",
                 ...args
             );
         };
         this.error = (...args) => {
             console.error(
-                outputString,
+                this.outputString,
                 "color: gray, background: #DC143C",
                 ...args
             );
@@ -161,9 +161,9 @@ module.exports = {
      */
     loopThroughObjByKey(obj, keys) {
         for (let key of keys) {
-            obj = config[name];
+            obj = obj[key];
             if (!obj) {
-                throw "Key not found.";
+                return "KeyNotFoundForSureOhNo";
             }
         }
         return obj;
@@ -175,17 +175,17 @@ module.exports = {
      * @returns {any} the value, will fallback to defaultConfig.
      */
     get: function(...keys) {
-        try {
-            return loopThroughObjByKey(
-                config.spaces[currentDesktopWallpaper],
-                keys
-            );
-        } catch (e) {
-            return loopThroughObjByKey(
+        let cfgValue = module.exports.loopThroughObjByKey(
+            config.spaces[currentDesktopWallpaper],
+            keys
+        );
+        if (cfgValue == "KeyNotFoundForSureOhNo") {
+            return module.exports.loopThroughObjByKey(
                 defaultConfig.spaces[currentDesktopWallpaper],
                 keys
             );
         }
+        return cfgValue;
     },
 
     /**
@@ -248,7 +248,9 @@ module.exports = {
         module.exports.injectCSSVariables();
     },
 
-    addPluginConfig: function() {},
+    addPluginConfig: function(plugin) {
+        defaultConfig.spaces.default.widgets[plugin.name] = plugin.config;
+    },
 
     /**
      * Inject CSS variables to the document.
