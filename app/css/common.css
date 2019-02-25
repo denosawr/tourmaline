@@ -82,7 +82,7 @@ body {
 #leftBar {
     position: absolute;
     z-index: 100;
-    color: rgba(255, 255, 255, 0.7);
+    /* color: rgba(255, 255, 255, 0.7); */
 }
 
 .leftBarItem {
@@ -104,7 +104,7 @@ body {
     padding-left: 9.25px;
     padding-right: 9.25px;
     transition: opacity 0.5s;
-    color: rgba(255, 255, 255, 0.7);
+    /* color: rgba(255, 255, 255, 0.7); */
 }
 
 .widgetBarItem.itemActivated {

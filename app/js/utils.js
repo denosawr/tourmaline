@@ -20,6 +20,7 @@ defaultConfig = JSON.parse(
 
 let generalCSSVariables = {};
 let pluginCSSVariables = {};
+let pluginElements = {};
 
 function recurseThroughDict(obj, prefix) {
     if (!prefix) prefix = "";
@@ -27,7 +28,9 @@ function recurseThroughDict(obj, prefix) {
     let items = {};
 
     for (let item in obj) {
-        if (typeof obj[item] == "object") {
+        if (item == "style" || typeof obj[item] != "object") {
+            items[prefix + (prefix ? "-" : "") + item] = obj[item];
+        } else {
             items = Object.assign(
                 {},
                 items,
@@ -36,8 +39,6 @@ function recurseThroughDict(obj, prefix) {
                     prefix + (prefix ? "-" : "") + item
                 )
             );
-        } else {
-            items[prefix + (prefix ? "-" : "") + item] = obj[item];
         }
     }
     return items;
@@ -93,62 +94,70 @@ module.exports = {
             stripJsonComments(fs.readFileSync(CONFIG_PATH, "utf8"))
         );
 
-        // // Inject variables
-        // let configVariables = recurseThroughDict(config);
+        log.log(config, defaultConfig);
 
-        // // Remove space-specific config - just clogs up the CSS var space
-        // configVariables = Object.keys(configVariables)
-        //     .filter(key => !key.startsWith("spaces-"))
-        //     .reduce((obj, key) => {
-        //         obj["cfg-" + key] = configVariables[key];
-        //         return obj;
-        //     }, {});
-
-        // module.exports.addCSSVariables(configVariables);
-        module.exports.updateCurrentSpace("default");
+        //module.exports.updateCurrentSpace("default", true);
     },
 
     /**
      * Function to be called internally when current space changes.
      * Will update CSS and config variables.
      * @param {string} desktopWallpaper desktop wallpaper name, passed from helper
+     * @param {bool} skipUpdate skip updating plugins. Called on first run.
      */
-    updateCurrentSpace(desktopWallpaper) {
+    updateCurrentSpace(desktopWallpaper, skipUpdate) {
+        log.log("Current desktop wallpaper:", desktopWallpaper);
         if (!(desktopWallpaper in config.spaces)) {
             // There is no entry for this wallpaper, revert to default
             desktopWallpaper = "default";
         }
         currentDesktopWallpaper = desktopWallpaper;
 
+        // set CSS variables to match current space config
         let configVariables = recurseThroughDict(
             config.spaces[desktopWallpaper]
         );
 
         let defaultConfigVariables = recurseThroughDict(
-            defaultConfig.spaces[desktopWallpaper]
+            desktopWallpaper in defaultConfig
+                ? defaultConfig.spaces[desktopWallpaper]
+                : defaultConfig.spaces.default
         );
 
-        let pluginCSSVariables = {};
+        pluginCSSVariables = {};
         for (let key of Object.keys(defaultConfigVariables)) {
             pluginCSSVariables["cfg-" + key] =
                 key in configVariables
                     ? configVariables[key] // if key has user defined value, use that
                     : defaultConfigVariables[key]; // else use default
         }
-
-        // pluginCSSVariables = Object.keys(defaultConfigVariables).reduce(
-        //     (obj, key) => {
-        //         log.log(obj, key);
-        //         obj["cfg-" + key] =
-        //             key in configVariables
-        //                 ? configVariables[key]
-        //                 : defaultConfigVariables[key];
-        //         return obj;
-        //     },
-        //     {}
-        // );
-
         log.log(pluginCSSVariables);
+        module.exports.injectCSSVariables();
+
+        if (skipUpdate) return;
+
+        // Update widget styling
+        for (let key in global.plugins) {
+            let plugin = global.plugins[key];
+            let elementStyle = module.exports.get(
+                "plugins",
+                plugin.name,
+                "style"
+            );
+            let style =
+                elementStyle != "KeyNotFoundForSureOhNo"
+                    ? elementStyle
+                    : module.exports.get("style");
+
+            if (pluginElements[plugin.name]) {
+                module.exports.setStyleOfElement(
+                    pluginElements[plugin.name],
+                    style
+                );
+            }
+
+            if (plugin.update) plugin.update();
+        }
     },
 
     /**
@@ -180,10 +189,17 @@ module.exports = {
             keys
         );
         if (cfgValue == "KeyNotFoundForSureOhNo") {
-            return module.exports.loopThroughObjByKey(
-                defaultConfig.spaces[currentDesktopWallpaper],
-                keys
-            );
+            if (currentDesktopWallpaper in defaultConfig.spaces) {
+                return module.exports.loopThroughObjByKey(
+                    defaultConfig.spaces[currentDesktopWallpaper],
+                    keys
+                );
+            } else {
+                return module.exports.loopThroughObjByKey(
+                    defaultConfig.spaces.default,
+                    keys
+                );
+            }
         }
         return cfgValue;
     },
@@ -261,7 +277,9 @@ module.exports = {
 
         // Inject all styles; include both general and plugin-specific CSS vars
         for (let variableList of [generalCSSVariables, pluginCSSVariables]) {
+            log.log(variableList);
             for (let varName in variableList) {
+                log.log(varName);
                 document.documentElement.style.setProperty(
                     "--" + varName,
                     variableList[varName]
@@ -271,8 +289,24 @@ module.exports = {
     },
 
     /**
+     * Sets the style of an element. First deletes all existing styles.
+     * @param {HTMLElement} element
+     * @param {obj} style dict with all the CSS styles
+     */
+    setStyleOfElement: function(element, style) {
+        if (typeof style == "string") {
+            element.setAttribute("style", style);
+            return;
+        }
+        element.setAttribute("style", ""); // delete existing style
+        for (let styleName in style) {
+            element.style[styleName] = style[styleName];
+        }
+    },
+
+    /**
      * Make a DOM element with the specified attributes.
-     * @param {string} tag
+     * @param {str} tag
      * @param {Object} params
      * @returns {Element}
      */
@@ -282,9 +316,7 @@ module.exports = {
             if (key == "class") {
                 element.classList.add(...attrs[key]);
             } else if (key == "style") {
-                for (let styleName in attrs[key]) {
-                    element.style[styleName] = attrs[key][styleName];
-                }
+                module.exports.setStyleOfElement(element, attrs[key]);
             } else {
                 element[key] = attrs[key];
             }
@@ -294,10 +326,15 @@ module.exports = {
 
     /**
      * Makes a div with given classes, and adds it to the global widget.
+     * @param {obj} plugin the plugin itself
      * @param {str} side Side: one of {left, center/centre, right}
      * @param {obj} args Args. Will be passed through to makeElement.
      */
-    makeAttachedElement: function(side, args) {
+    makeAttachedElement: function(plugin, side, args) {
+        if (plugin.name in pluginElements) {
+            throw `A plugin with the name ${plugin.name} is already loaded.`;
+        }
+
         if (!["right", "center", "centre", "left"].includes(side)) {
             throw "Invalid side: " +
                 side +
@@ -314,8 +351,15 @@ module.exports = {
                 : ["widgetBarItem", "itemDeactivated"])
         );
 
+        let elementStyle = module.exports.get("plugins", plugin.name, "style");
+        args.style =
+            elementStyle != "KeyNotFoundForSureOhNo"
+                ? elementStyle
+                : module.exports.get("style");
+
         let element = module.exports.makeElement("div", args);
         global.widgets[side + "Bar"].appendChild(element);
+        pluginElements[plugin.name] = element;
         return element;
     },
 

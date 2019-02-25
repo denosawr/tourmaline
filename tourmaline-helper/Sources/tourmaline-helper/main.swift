@@ -325,7 +325,11 @@ func createSocket() {
         detectSelectionChangeSetup = false
     }
     socket.on("getWallpaper") { (dataArray, ack) in
-        let _ = updateWallpaper()
+        guard let wp = updateWallpaper() else {
+            socket.emit("reloadBackground", "default")
+            return
+        }
+        socket.emit("reloadBackground", wp)
     }
     // shutdown. called on main app exit
     socket.on("shutdown") { (dataArray, ack) in

@@ -45,14 +45,14 @@ function findPlugins() {
 /**
  * Call to refresh the wallpaper.
  */
-function darkenMenubar() {
+function spaceChange() {
+    // darken menubar
     document
         .getElementsByTagName("body")[0]
         .setAttribute("style", "opacity: 0; transition: none;");
 }
 
-function reloadBackground() {
-    log.log("reloadBackground");
+function reloadBackground(msg) {
     let bgimage = document.getElementById("bgimage");
     bgimage.setAttribute(
         "style",
@@ -62,6 +62,9 @@ function reloadBackground() {
     document
         .getElementsByTagName("body")[0]
         .setAttribute("style", "transition: 0.3s; opacity: 1;");
+
+    // Update plugins and things
+    utils.updateCurrentSpace(msg);
 }
 
 /**
@@ -85,7 +88,7 @@ function main() {
 
     event = require(__dirname + "/js/events.js");
     emitter = event.startListeners();
-    emitter.on("space-change", darkenMenubar);
+    emitter.on("space-change", spaceChange);
     emitter.on("reload-background", reloadBackground);
 
     // Require all the important modules.
@@ -110,6 +113,7 @@ function main() {
 
     // Load plugin config & CSS
     for (let plugin of plugins) {
+        global.plugins[plugin.name] = plugin;
         utils.addPluginConfig(plugin);
 
         if (plugin.style) {
@@ -120,7 +124,6 @@ function main() {
 
     // init plugins
     for (let plugin of plugins) {
-        global.plugins[plugin.name] = plugin;
         plugin.init(emitter);
     }
 }

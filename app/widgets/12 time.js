@@ -13,7 +13,7 @@ let prevDateString = "";
  */
 function setTimeWidget() {
     let dateString =
-        '<span style="color: white;">' +
+        '<span style="color: var(--cfg-plugins-time-main)">' +
         getTimeString() +
         "</span>" +
         "&nbsp&nbsp&nbsp" +
@@ -26,13 +26,23 @@ function setTimeWidget() {
 }
 
 module.exports = {
+    name: "time",
+
+    config: {
+        main: "white",
+    },
+
     init: function() {
-        global.widgets.time = utils.makeAttachedElement("right", {
-            id: "timeWidget",
-            style: {
-                "padding-right": 0,
-            },
-        });
+        global.widgets.time = utils.makeAttachedElement(
+            module.exports,
+            "right",
+            {
+                id: "timeWidget",
+                style: {
+                    "padding-right": 0,
+                },
+            }
+        );
 
         setTimeWidget();
     },

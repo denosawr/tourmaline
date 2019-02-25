@@ -88,7 +88,6 @@ module.exports = {
 
             socket.emit("getWallpaper");
             log.log("connected to a new socket.");
-            emit("reload-background")();
             socket.on("disconnect", function() {
                 log.warn("user disconnected");
             });
@@ -102,7 +101,7 @@ module.exports = {
                 emit("selection-change", msg)();
             });
 
-            socket.on("spaceChange", function() {
+            socket.on("spaceChange", function(m) {
                 emit("space-change")();
             });
 

@@ -35,9 +35,13 @@ module.exports = {
     },
 
     init: function(emitter) {
-        global.widgets[NAME] = utils.makeAttachedElement("right", {
-            textContent: "↓ -- ↑ --",
-        });
+        global.widgets[NAME] = utils.makeAttachedElement(
+            module.exports,
+            "right",
+            {
+                textContent: "↓ -- ↑ --",
+            }
+        );
         update();
     },
 };

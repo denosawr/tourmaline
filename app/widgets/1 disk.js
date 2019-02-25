@@ -36,7 +36,10 @@ module.exports = {
     },
 
     init: function(emitter) {
-        global.widgets[NAME] = utils.makeAttachedElement("left");
+        global.widgets[NAME] = utils.makeAttachedElement(
+            module.exports,
+            "left"
+        );
         update();
     },
 };

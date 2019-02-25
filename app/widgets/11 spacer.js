@@ -13,8 +13,12 @@ module.exports = {
     config: {},
 
     init: function(emitter) {
-        global.widgets[NAME] = utils.makeAttachedElement("right", {
-            style: { "padding-right": "10px", "padding-left": "10px" },
-        });
+        global.widgets[NAME] = utils.makeAttachedElement(
+            module.exports,
+            "right",
+            {
+                style: { "padding-right": "10px", "padding-left": "10px" },
+            }
+        );
     },
 };
