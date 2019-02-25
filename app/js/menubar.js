@@ -117,6 +117,8 @@ module.exports = {
         .menuBarItem {
             padding-left: 9.25px;
             padding-right: 9.25px;
+            color: white;
+            color: var(--cfg-foreground);
         }
 
         .menuBarItemSelected {

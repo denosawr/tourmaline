@@ -93,10 +93,6 @@ module.exports = {
         config = JSON.parse(
             stripJsonComments(fs.readFileSync(CONFIG_PATH, "utf8"))
         );
-
-        log.log(config, defaultConfig);
-
-        //module.exports.updateCurrentSpace("default", true);
     },
 
     /**
@@ -131,7 +127,6 @@ module.exports = {
                     ? configVariables[key] // if key has user defined value, use that
                     : defaultConfigVariables[key]; // else use default
         }
-        log.log(pluginCSSVariables);
         module.exports.injectCSSVariables();
 
         if (skipUpdate) return;
@@ -277,9 +272,7 @@ module.exports = {
 
         // Inject all styles; include both general and plugin-specific CSS vars
         for (let variableList of [generalCSSVariables, pluginCSSVariables]) {
-            log.log(variableList);
             for (let varName in variableList) {
-                log.log(varName);
                 document.documentElement.style.setProperty(
                     "--" + varName,
                     variableList[varName]
