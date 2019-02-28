@@ -314,7 +314,14 @@ func createSocket() {
     }
     socket.on(clientEvent: .connect) { (dataArray, ack) in
         NSLog("Connected.")
+        socket.emit("reloadBackground", "default")
         checkForPermissions()
+        let menuBarItems = getMenuItemTitles()
+        if !menuBarItems.isEmpty {
+            socket.emit("windowChange", menuBarItems)
+        } else {
+            socket.emit("windowChange", ["Apple", "Error"])
+        }
     }
     socket.on("startSelectionListener") { (dataArray, ack) in
         detectSelectionChange = true

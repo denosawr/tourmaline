@@ -94,7 +94,7 @@ module.exports = {
             style: {
                 fontWeight: "bold",
             },
-            textContent: "Tourmaline",
+            textContent: "Tourmaline is loading...",
         });
 
         global.widgets.childMenuBar = utils.makeElement("div", {
