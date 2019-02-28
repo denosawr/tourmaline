@@ -113,6 +113,8 @@ module.exports = {
             config.spaces[desktopWallpaper]
         );
 
+        let defaultSpaceVariables = recurseThroughDict(config.spaces.default);
+
         let defaultConfigVariables = recurseThroughDict(
             desktopWallpaper in defaultConfig
                 ? defaultConfig.spaces[desktopWallpaper]
@@ -121,10 +123,15 @@ module.exports = {
 
         pluginCSSVariables = {};
         for (let key of Object.keys(defaultConfigVariables)) {
-            pluginCSSVariables["cfg-" + key] =
-                key in configVariables
-                    ? configVariables[key] // if key has user defined value, use that
-                    : defaultConfigVariables[key]; // else use default
+            let value;
+            if (key in configVariables) {
+                value = configVariables[key];
+            } else if (key in defaultSpaceVariables) {
+                value = defaultSpaceVariables[key];
+            } else {
+                value = defaultConfigVariables[key];
+            }
+            pluginCSSVariables["cfg-" + key] = value;
         }
         module.exports.injectCSSVariables();
 
@@ -183,6 +190,14 @@ module.exports = {
             keys
         );
         if (cfgValue == "KeyNotFoundForSureOhNo") {
+            cfgValue = module.exports.loopThroughObjByKey(
+                config.spaces.default,
+                keys
+            );
+            if (cfgValue != "KeyNotFoundForSureOhNo") {
+                return cfgValue;
+            }
+
             if (currentDesktopWallpaper in defaultConfig.spaces) {
                 return module.exports.loopThroughObjByKey(
                     defaultConfig.spaces[currentDesktopWallpaper],
