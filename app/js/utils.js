@@ -7,7 +7,6 @@ const stripJsonComments = require("strip-json-comments");
 const CONFIG_PATH = path.join(process.env.HOME, ".config/tourmaline.json");
 
 let currentDesktopWallpaper = "default";
-let processHandlers = {};
 let config = {};
 defaultConfig = JSON.parse(
     stripJsonComments(

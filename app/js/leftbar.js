@@ -33,7 +33,8 @@ module.exports = {
             .right;
         global.widgets.leftBar.setAttribute(
             "style",
-            `left: calc(${r}px - var(--left-margin));`
+            // `left: calc(${r}px - var(--left-margin));`
+            `left: calc(${r}px);`
         );
     },
 };
