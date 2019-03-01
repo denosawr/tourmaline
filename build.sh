@@ -28,7 +28,7 @@ cd tourmaline-helper
 
 echo Post-building helper work
 cd ../
-cp -r tourmaline-helper/tourmaline-helper.app build/tourmaline.app/Contents/Frameworks/helper.app
+cp -r tourmaline-helper/tourmaline-helper.app build/tourmaline.app/Contents/Frameworks/tourmaline-helper.app
 
 # cp app/tourmaline-helper/tourmaline-helper-app tourmaline-darwin-x64/tourmaline.app/Contents/Frameworks/tourmaline-helper-app
 

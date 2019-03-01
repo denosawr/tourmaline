@@ -378,6 +378,26 @@ module.exports = {
     menuBarHeight: function() {
         return 22;
     },
+
+    /**
+     * Searches both Frameworks and the raw file path for the helper app.
+     * @param {str} filename the name of the executable
+     * @returns path of the found application.
+     */
+    getHelperPath: function(filename) {
+        log.log(path.join(__dirname, `../../../../Frameworks/${filename}`));
+        let helperPath = path.join(
+            __dirname,
+            `../../../../Frameworks/${filename}`
+        );
+        if (!fs.existsSync(helperPath)) {
+            helperPath = path.join(
+                __dirname,
+                `../../tourmaline-helper/${filename}`
+            );
+        }
+        return helperPath;
+    },
 };
 
 // so utils can also log.

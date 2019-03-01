@@ -130,17 +130,7 @@ module.exports = {
 
         // Start tourmaline helper, if not already started.
         let arguments_ = Array.from(process.argv);
-        log.log(path.join(__dirname, "../../../../Frameworks/helper.app"));
-        let helperPath = path.join(
-            __dirname,
-            "../../../../Frameworks/helper.app"
-        );
-        if (!fs.existsSync(helperPath)) {
-            helperPath = path.join(
-                __dirname,
-                "../../tourmaline-helper/tourmaline-helper.app"
-            );
-        }
+        let helperPath = utils.getHelperPath("tourmaline-helper.app");
         log.log(helperPath);
         if (!arguments_ || !arguments_.includes("--no-launch-helper")) {
             let objectList = psList().then(options => {
