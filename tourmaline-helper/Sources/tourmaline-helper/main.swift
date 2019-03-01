@@ -4,7 +4,7 @@ import Foundation
 import AppKit
 import ImageIO
 
-var firstTime: Bool = true
+var disconnectedTimes = 0
 var detectSelectionChange = false
 var detectSelectionChangeSetup = false
 var screensaver = false
@@ -19,6 +19,10 @@ setbuf(__stderrp, nil)
 class Manager: SocketManager {
     override func engineDidError(reason: String) {
         NSLog("Could not connect to main app socket. Is the port being used?")
+        disconnectedTimes += 1
+        if (disconnectedTimes > 3) {
+            exit(0)
+        }
     }
 }
 
@@ -314,6 +318,7 @@ func createSocket() {
     }
     socket.on(clientEvent: .connect) { (dataArray, ack) in
         NSLog("Connected.")
+        disconnectedTimes = 0
         socket.emit("reloadBackground", "default")
         checkForPermissions()
         let menuBarItems = getMenuItemTitles()
