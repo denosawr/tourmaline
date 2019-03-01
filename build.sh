@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ ! -f tourmaline-helper/space-number-app ]; then
+    printf "\e[31mThere is no space-number executable! Please build it yourself (\e[37mtourmaline-helper/space-number\e[31m) and then move the compiled binary to \e[37mtourmaline-helper/space-number-app\e[31m.\e[90m\n"
+    exit
+fi
+
 printf "\e[36mPackaging Electron app...\e[90m\n"
 
 # electron-packager - build Electron app to build/
