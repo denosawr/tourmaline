@@ -33,7 +33,8 @@ body {
     overflow: hidden;
     line-height: var(--window-height);
 
-    font-family: -apple-system, BlinkMacSystemFont;
+    /* font-family: -apple-system, BlinkMacSystemFont; */
+    font-family: var(--cfg-font, BlinkMacSystemFont);
     font-size: 14px;
 
     user-select: none;

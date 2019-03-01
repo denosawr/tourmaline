@@ -115,6 +115,7 @@ module.exports = {
         }
 
         .menuBarItem {
+            font-family: BlinkMacSystemFont;
             padding-left: 9.25px;
             padding-right: 9.25px;
             color: white;
