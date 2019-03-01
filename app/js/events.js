@@ -112,7 +112,6 @@ module.exports = {
             socket.on("noAccessibility", function() {
                 // We don't have accessibility. This... isn't a great situation.
                 log.log("No Accessibility.");
-                socket.emit("shutdown");
                 dialog.showMessageBox(null, {
                     type: "error",
                     title: "Enable Accessibility permissions!",
