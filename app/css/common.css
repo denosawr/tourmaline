@@ -47,7 +47,7 @@ body {
     left: 0;
     right: 0;
     padding: 0 calc(var(--right-margin) + var(--overflow)) 0
-        calc(var(--left-margin) + var(--overflow));
+        calc(var(--left-margin) + var(--overflow) - 35px);
     display: flex;
     flex-direction: row;
     justify-content: flex-start;

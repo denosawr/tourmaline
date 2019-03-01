@@ -50,6 +50,7 @@ function menuItemSelectionChange(data) {
         global.variablesselected = false;
     } else {
         // something selected!
+        log.debug(selectedElement);
 
         let elements = document.getElementsByClassName("menuBarItem");
         for (let element of elements) {
@@ -61,6 +62,9 @@ function menuItemSelectionChange(data) {
         }
         global.variablesselected = true;
     }
+    global.widgets.appleMenuItem.classList[
+        selectedElement == "Apple" ? "add" : "remove" // if "Apple" is selected, we add; otherwise, we remove
+    ]("menuBarItemSelected");
 }
 
 module.exports = {
@@ -88,6 +92,16 @@ module.exports = {
             id: "menuBar",
         });
 
+        global.widgets.appleMenuItem = utils.makeElement("div", {
+            class: ["menuBarItem"],
+            id: "appleMenuItem",
+            style: {
+                fontSize: "18px",
+            },
+            textContent: "",
+            // textContent: "2",
+        });
+
         global.widgets.localizedNameHolder = utils.makeElement("div", {
             class: ["menuBarItem"],
             id: "localizedNameHolder",
@@ -102,6 +116,7 @@ module.exports = {
             class: ["container", "menuBarChild", "itemDeactivated"],
         });
 
+        global.widgets.menuBar.appendChild(global.widgets.appleMenuItem);
         global.widgets.menuBar.appendChild(global.widgets.localizedNameHolder);
         global.widgets.menuBar.appendChild(global.widgets.childMenuBar);
 
@@ -112,6 +127,12 @@ module.exports = {
     style: `
         #localizedNameContainer {
             font-weight: bold;
+        }
+        
+        #appleMenuItem {
+            min-width: 16.5px;
+            max-width: 16.5px;
+            text-align: center;
         }
 
         .menuBarItem {
