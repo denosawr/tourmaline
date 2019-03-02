@@ -4,23 +4,32 @@ const path = require("path");
 const { ipcRenderer } = require("electron");
 const stripJsonComments = require("strip-json-comments");
 
-const CONFIG_PATH = path.join(process.env.HOME, ".config/tourmaline.json");
+/**
+ * @private
+ * Loops through object, given keys.
+ * loopThroughObjByKey(o, ["test", "hi"]) = o.test.hi
+ * @throws if key is not found
+ * @param {object} obj object to recurse through.
+ * @param  {string[]} keys the keys to work through.
+ * @returns key if found.
+ */
+function loopThroughObjByKey(obj, keys) {
+    for (let key of keys) {
+        obj = obj[key];
+        if (!obj) {
+            return "KeyNotFoundForSureOhNo";
+        }
+    }
+    return obj;
+}
 
-let currentDesktopWallpaper = "default";
-let config = {};
-defaultConfig = JSON.parse(
-    stripJsonComments(
-        fs.readFileSync(
-            path.join(__dirname, "../../default-config.json"),
-            "utf8"
-        )
-    )
-);
-
-let generalCSSVariables = {};
-let pluginCSSVariables = {};
-let pluginElements = {};
-
+/**
+ * @private
+ * Returns of all items in object, handing nested objects by prepending their path.
+ * @param {object} obj Object to recurse through
+ * @param {str} prefix Prefix to add to all recursions
+ * @returns {obj} all items in obj
+ */
 function recurseThroughDict(obj, prefix) {
     if (!prefix) prefix = "";
 
@@ -43,7 +52,15 @@ function recurseThroughDict(obj, prefix) {
     return items;
 }
 
-module.exports = {
+// Start with blank module.exports...
+module.exports = {};
+
+/*
+ * --------------------------------------------------------
+ * General helper utilities.
+ * --------------------------------------------------------
+ */
+Object.assign(module.exports, {
     /**
      * Logging class. Has the same output functions as console, but
      * prepends moduleName.
@@ -79,6 +96,71 @@ module.exports = {
     },
 
     /**
+     * Get height of macOS default menu bar.
+     * I think the menu bar height is constant.
+     * @returns {number}
+     */
+    menuBarHeight: function() {
+        return 22;
+    },
+
+    /**
+     * Searches both Frameworks and the raw file path for the helper app.
+     * @param {str} filename the name of the executable
+     * @returns path of the found application.
+     */
+    getHelperPath: function(filename) {
+        log.log(path.join(__dirname, `../../../../Frameworks/${filename}`));
+        let helperPath = path.join(
+            __dirname,
+            `../../../../Frameworks/${filename}`
+        );
+        if (!fs.existsSync(helperPath)) {
+            helperPath = path.join(
+                __dirname,
+                `../../tourmaline-helper/${filename}`
+            );
+        }
+        return helperPath;
+    },
+
+    /**
+     * Creates a handler to log childprocess errors to console.
+     * @param {EventEmitter} cp
+     * @param {string} name
+     */
+    errorHandler: function(cp, name) {
+        cp.on("error", err => {
+            log.error(`Error in child process ${name}: ${err}`);
+        });
+        cp.stderr.on("data", data => {
+            log.error(`stderr in child process ${name}: ${data.toString()}`);
+        });
+    },
+});
+
+/*
+ * --------------------------------------------------------
+ * Deals with everything config.
+ * --------------------------------------------------------
+ */
+
+const CONFIG_PATH = path.join(process.env.HOME, ".config/tourmaline.json");
+let currentDesktopWallpaper = "default";
+
+let config = {}; // for the loaded config file
+defaultConfig = JSON.parse(
+    stripJsonComments(
+        fs.readFileSync(
+            path.join(__dirname, "../../default-config.json"),
+            "utf8"
+        )
+    )
+); // for the default config file
+
+Object.assign(module.exports, {
+    /**
+     * @private
      * Loads the config file.
      * Note: access config file data with module.exports.get()
      */
@@ -95,6 +177,7 @@ module.exports = {
     },
 
     /**
+     * @private
      * Function to be called internally when current space changes.
      * Will update CSS and config variables.
      * @param {string} desktopWallpaper desktop wallpaper name, passed from helper
@@ -162,71 +245,57 @@ module.exports = {
     },
 
     /**
-     * Loops through object, given keys.
-     * loopThroughObjByKey(o, ["test", "hi"]) = o.test.hi
-     * @throws if key is not found
-     * @param {object} obj object to recurse through.
-     * @param  {string[]} keys the keys to work through.
-     * @returns key if found.
-     */
-    loopThroughObjByKey(obj, keys) {
-        for (let key of keys) {
-            obj = obj[key];
-            if (!obj) {
-                return "KeyNotFoundForSureOhNo";
-            }
-        }
-        return obj;
-    },
-
-    /**
      * Retrieves config option from the loaded config. Will fallback to default.
      * @param {...string} keys the path to the config value, relative to space.
      * @returns {any} the value, will fallback to defaultConfig.
      */
     get: function(...keys) {
-        let cfgValue = module.exports.loopThroughObjByKey(
+        let cfgValue = loopThroughObjByKey(
             config.spaces[currentDesktopWallpaper],
             keys
         );
         if (cfgValue == "KeyNotFoundForSureOhNo") {
-            cfgValue = module.exports.loopThroughObjByKey(
-                config.spaces.default,
-                keys
-            );
+            cfgValue = loopThroughObjByKey(config.spaces.default, keys);
             if (cfgValue != "KeyNotFoundForSureOhNo") {
                 return cfgValue;
             }
 
             if (currentDesktopWallpaper in defaultConfig.spaces) {
-                return module.exports.loopThroughObjByKey(
+                return loopThroughObjByKey(
                     defaultConfig.spaces[currentDesktopWallpaper],
                     keys
                 );
             } else {
-                return module.exports.loopThroughObjByKey(
-                    defaultConfig.spaces.default,
-                    keys
-                );
+                return loopThroughObjByKey(defaultConfig.spaces.default, keys);
             }
         }
         return cfgValue;
     },
 
     /**
-     * Creates a handler to log childprocess errors to console.
-     * @param {EventEmitter} cp
-     * @param {string} name
+     * @private
+     * Loads plugin config.
+     * @param {module} plugin Plugin (require'd) to add the config of.
      */
-    errorHandler: function(cp, name) {
-        cp.on("error", err => {
-            log.error(`Error in child process ${name}: ${err}`);
-        });
-        cp.stderr.on("data", data => {
-            log.error(`stderr in child process ${name}: ${data.toString()}`);
-        });
+    addPluginConfig: function(plugin) {
+        defaultConfig.spaces.default.plugins[plugin.name] = plugin.config;
     },
+});
 
+/*
+ * --------------------------------------------------------
+ * Everything to do with the DOM.
+ * --------------------------------------------------------
+ */
+
+// CSS variables
+let generalCSSVariables = {};
+let pluginCSSVariables = {};
+
+// All the plugin-created attached elements.
+let pluginElements = {};
+
+Object.assign(module.exports, {
     /**
      * Switch two class names around, for all elements with that class name.
      * @param {string} oldClass
@@ -252,6 +321,7 @@ module.exports = {
     },
 
     /**
+     * @private
      * Injects custom CSS to the application.
      * @param {string} cssToInject
      */
@@ -262,6 +332,7 @@ module.exports = {
     },
 
     /**
+     * @private
      * Change root CSS variables. Adds it to a global store.
      * @param {Object} cssVariables variables to set with CSS.
      */
@@ -273,13 +344,9 @@ module.exports = {
         module.exports.injectCSSVariables();
     },
 
-    addPluginConfig: function(plugin) {
-        defaultConfig.spaces.default.plugins[plugin.name] = plugin.config;
-    },
-
     /**
-     * Inject CSS variables to the document.
-     * You shouldn't need to use this function.
+     * @private
+     * Inject CSS attributes to the document.
      */
     injectCSSVariables: function() {
         document.documentElement.removeAttribute("style"); // clear all styles first
@@ -333,7 +400,8 @@ module.exports = {
 
     /**
      * Makes a div with given classes, and adds it to the global widget.
-     * @param {obj} plugin the plugin itself
+     * IMPORTANT: only call it once from a plugin!
+     * @param {obj} plugin the plugin itself. Should be module.exports.
      * @param {str} side Side: one of {left, center/centre, right}
      * @param {obj} args Args. Will be passed through to makeElement.
      */
@@ -369,36 +437,7 @@ module.exports = {
         pluginElements[plugin.name] = element;
         return element;
     },
+});
 
-    /**
-     * Get height of macOS default menu bar.
-     * I think the menu bar height is constant.
-     * @returns {number}
-     */
-    menuBarHeight: function() {
-        return 22;
-    },
-
-    /**
-     * Searches both Frameworks and the raw file path for the helper app.
-     * @param {str} filename the name of the executable
-     * @returns path of the found application.
-     */
-    getHelperPath: function(filename) {
-        log.log(path.join(__dirname, `../../../../Frameworks/${filename}`));
-        let helperPath = path.join(
-            __dirname,
-            `../../../../Frameworks/${filename}`
-        );
-        if (!fs.existsSync(helperPath)) {
-            helperPath = path.join(
-                __dirname,
-                `../../tourmaline-helper/${filename}`
-            );
-        }
-        return helperPath;
-    },
-};
-
-// so utils can also log.
+// so utils can log.
 const log = new module.exports.log("utils");
