@@ -44,10 +44,10 @@ function createWindow() {
     win.setPosition(-6, -1, false);
 
     const menuBarHeight = utils.menuBarHeight();
-    win.setSize(display.workArea.width + 12, menuBarHeight + 2);
 
     // and load the index.html of the app.
     win.loadFile(__dirname + "/app/index.html");
+    win.setSize(display.size.width + 12, menuBarHeight + 2);
 
     return win;
 }

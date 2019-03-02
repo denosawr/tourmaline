@@ -3,10 +3,7 @@
 :root {
     --left-margin: 44.75px;
     --right-margin: 44.75px;
-    --window-height: 23px;
     --overflow: 6px;
-    --screen-width: 1920px;
-    --screen-height: 1080px;
 }
 
 #bgimage {
@@ -31,7 +28,7 @@ body {
     margin: 0;
     color: var(--cfg-foreground, white);
     overflow: hidden;
-    line-height: var(--window-height);
+    line-height: 22px;
 
     /* font-family: -apple-system, BlinkMacSystemFont; */
     font-family: var(--cfg-font, BlinkMacSystemFont);

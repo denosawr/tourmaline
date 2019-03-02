@@ -2,7 +2,7 @@
  * Load everything up!
  */
 
-const { ipcRenderer } = require("electron");
+const { screen } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const utils = require(path.resolve(__dirname, "js/utils.js"));
@@ -77,9 +77,10 @@ function main() {
     global.widgets.centreBar = document.getElementById("middle");
 
     // set a bunch of CSS variables
+    const display = screen.getPrimaryDisplay();
     utils.addCSSVariables({
-        "screen-width": screen.width + "px",
-        "screen-height": screen.height + "px",
+        "screen-width": display.size.width + "px",
+        "screen-height": display.size.height + "px",
         "window-height": window.outerHeight + "px",
     });
 
