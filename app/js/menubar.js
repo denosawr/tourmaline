@@ -7,7 +7,6 @@ const log = new utils.log("menubar");
 
 // let menuBar, childMenuBar, localizedNameHolder, child, selectionChangeProcess;
 let globalEmitter;
-let systemInfoWidget;
 
 /**
  * The items in the menubar have changed, reload them.
