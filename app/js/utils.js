@@ -1,7 +1,6 @@
 const fs = require("fs");
 const cp = require("child_process");
 const path = require("path");
-const { ipcRenderer } = require("electron");
 const stripJsonComments = require("strip-json-comments");
 
 /**
@@ -62,37 +61,20 @@ module.exports = {};
  */
 Object.assign(module.exports, {
     /**
-     * Logging class. Has the same output functions as console, but
-     * prepends moduleName.
+     * Logging class. Has the same output functions as console except debug,
+     * but prepends moduleName.
      * @constructor
      * @param {string} moduleName name of module. Will be prepended to all output
      */
-    log: function(moduleName) {
-        this.outputString = "%c" + moduleName + ":";
-
-        this.debug = (...args) => {
-            console.debug(this.outputString, "background: #CCC", ...args);
-        };
-        this.log = (...args) => {
-            console.log(this.outputString, "background: #CCC", ...args);
-        };
-        this.info = (...args) => {
-            console.info(this.outputString, "background: #00B600", ...args);
-        };
-        this.warn = (...args) => {
-            console.warn(
-                this.outputString,
-                "color: black, background: #FBCEB1",
-                ...args
-            );
-        };
-        this.error = (...args) => {
-            console.error(
-                this.outputString,
-                "color: gray, background: #DC143C",
-                ...args
-            );
-        };
+    log: function(name) {
+        this.log = console.log.bind(console, `%c${name}:`, "background: #CCC");
+        this.info = console.info.bind(
+            console,
+            `%c${name}:`,
+            "background: #C8A7D9"
+        );
+        this.warn = console.warn.bind(console, `${name}:`);
+        this.error = console.error.bind(console, `${name}:`);
     },
 
     /**
@@ -110,7 +92,6 @@ Object.assign(module.exports, {
      * @returns path of the found application.
      */
     getHelperPath: function(filename) {
-        log.log(path.join(__dirname, `../../../../Frameworks/${filename}`));
         let helperPath = path.join(
             __dirname,
             `../../../../Frameworks/${filename}`
@@ -184,7 +165,7 @@ Object.assign(module.exports, {
      * @param {bool} skipUpdate skip updating plugins. Called on first run.
      */
     updateCurrentSpace(desktopWallpaper, skipUpdate) {
-        log.log("Current desktop wallpaper:", desktopWallpaper);
+        log.info("Current desktop wallpaper:", desktopWallpaper);
         if (!(desktopWallpaper in config.spaces)) {
             // There is no entry for this wallpaper, revert to default
             desktopWallpaper = "default";

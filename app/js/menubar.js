@@ -50,7 +50,6 @@ function menuItemSelectionChange(data) {
         global.variablesselected = false;
     } else {
         // something selected!
-        log.debug(selectedElement);
 
         let elements = document.getElementsByClassName("menuBarItem");
         for (let element of elements) {

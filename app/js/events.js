@@ -44,7 +44,6 @@ function emit() {
 }
 
 function mouseover() {
-    log.debug("mouseover");
     global.variables.activated = true;
     if (global.variables.selected) {
         return;
@@ -87,7 +86,7 @@ module.exports = {
             socket = socket_;
 
             socket.emit("getWallpaper");
-            log.log("connected to a new socket.");
+            log.info("Connected to a new socket with tourmaline-helper.");
             socket.on("disconnect", function() {
                 log.warn("user disconnected");
             });
@@ -111,7 +110,7 @@ module.exports = {
 
             socket.on("noAccessibility", function() {
                 // We don't have accessibility. This... isn't a great situation.
-                log.log("No Accessibility.");
+                log.error("No Accessibility.");
                 dialog.showMessageBox(null, {
                     type: "error",
                     title: "Enable Accessibility permissions!",
@@ -124,13 +123,12 @@ module.exports = {
         });
 
         http.listen(3000, function() {
-            log.log("Listening on *:3000");
+            log.info("Server listening on *:3000");
         });
 
         // Start tourmaline helper, if not already started.
         let arguments_ = Array.from(process.argv);
         let helperPath = utils.getHelperPath("tourmaline-helper.app");
-        log.log(helperPath);
         if (!arguments_ || !arguments_.includes("--no-launch-helper")) {
             let objectList = psList().then(options => {
                 let alreadyRunning = false;
@@ -141,7 +139,7 @@ module.exports = {
                 }
 
                 if (!alreadyRunning) {
-                    log.log(
+                    log.info(
                         "No existing tourmaline-helper running, will spawn another."
                     );
                     cp.spawn("open", ["-a", helperPath]);
