@@ -67,6 +67,23 @@ function menuItemSelectionChange(data) {
     ]("menuBarItemSelected");
 }
 
+function updateIndicator() {
+    let indicator = utils.get("plugins", "menubar", "applemenu", "indicator");
+    if (indicator == "indicator") {
+        // show the current space number
+        let spaceNumberPath = utils.getHelperPath("space-number-app");
+        let process = cp.spawn(spaceNumberPath, []);
+
+        process.stdout.on("data", data => {
+            global.widgets.appleMenuItem.textContent = data.toString();
+        });
+
+        utils.errorHandler(process, "MenubarIndicator");
+    } else {
+        global.widgets.appleMenuItem.textContent = indicator;
+    }
+}
+
 module.exports = {
     // Name. Is used for the config setting
     name: "menubar",
@@ -77,6 +94,16 @@ module.exports = {
     // The default config. This must feature all available config settings.
     config: {
         selectedBackground: "rgba(138, 55, 173, 0.6)",
+
+        applemenu: {
+            // default: "indicator", can use 
+            indicator: "indicator",
+            // default: "14px", can use "18px" for 
+            fontsize: "14px",
+            align: "center",
+            background: "transparent",
+            color: "rgba(255, 255, 255, 0.7)",
+        },
     },
 
     /// To be run when the function starts.
@@ -95,12 +122,8 @@ module.exports = {
         global.widgets.appleMenuItem = utils.makeElement("div", {
             class: ["menuBarItem"],
             id: "appleMenuItem",
-            style: {
-                fontSize: "18px",
-            },
-            textContent: "",
-            // textContent: "2",
         });
+        updateIndicator();
 
         global.widgets.localizedNameHolder = utils.makeElement("div", {
             class: ["menuBarItem"],
@@ -123,8 +146,16 @@ module.exports = {
         global.widgets.leftBarElement.appendChild(global.widgets.menuBar);
     },
 
+    update: function() {
+        updateIndicator();
+    },
+
     /// CSS to inject.
     style: `
+        .menuBarItemSelected {
+            background: var(--cfg-plugins-menubar-selectedBackground) !important;
+        }
+
         #localizedNameContainer {
             font-weight: bold;
         }
@@ -132,7 +163,10 @@ module.exports = {
         #appleMenuItem {
             min-width: 16.5px;
             max-width: 16.5px;
-            text-align: center;
+            font-size: var(--cfg-plugins-menubar-applemenu-fontsize, 14px);
+            text-align: var(--cfg-plugins-menubar-applemenu-align, center); 
+            background: var(--cfg-plugins-menubar-applemenu-background, transparent);
+            color: var(--cfg-plugins-menubar-applemenu-color, white);
         }
 
         .menuBarItem {
@@ -141,10 +175,6 @@ module.exports = {
             padding-right: 9.25px;
             color: white;
             color: var(--cfg-foreground);
-        }
-
-        .menuBarItemSelected {
-            background: rgba(138, 55, 173, 0.6);
         }
 
         .menuBarChild {

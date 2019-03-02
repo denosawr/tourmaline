@@ -28,7 +28,11 @@
             // Plugin config.
             "plugins": {
                 "menubar": {
-                    // Color of background for selected menu item
+                    // Replacing the  logo on the top left; "indicator" for space number
+                    // or any string
+                    // "applelogo": "",
+                    // Set logo size for 'applelogo'; default "14px", set to ~"18px" for the  character to get native size
+                    // "applelogosize": "18px",
                     "selectedBackground": "rgba(138, 55, 173, 0.6)"
                 },
                 "diskusage": {
