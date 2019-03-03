@@ -106,13 +106,13 @@ let menuItemsTemplate = [
     {
         label: "Show Configuration File",
         click: () => {
-            opn(path.join(homedir, ".config/tourmaline.json"));
+            opn(path.join(homedir, ".config/tourmaline.json"), { wait: false });
         },
     },
     {
         label: "Open Plugins Folder",
         click: () => {
-            opn(homedir);
+            opn(homedir, { wait: false });
         },
     },
 
@@ -121,7 +121,7 @@ let menuItemsTemplate = [
     {
         label: "About Tourmaline",
         click: () => {
-            opn("https://github.com/denosawr/tourmaline");
+            opn("https://github.com/denosawr/tourmaline", { wait: false });
         },
     },
     {
