@@ -219,11 +219,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
         detectSelectionChangeSetup = false
         
-        socket.emit("windowChange", ["Apple", applicationName])
+        socket.emit("window-change", ["Apple", applicationName])
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {  // this delay may need to be changed
             let menuBarItems = getMenuItemTitles()
             if !menuBarItems.isEmpty {
-                socket.emit("windowChange", menuBarItems)
+                socket.emit("window-change", menuBarItems)
             }
         }
     }
@@ -233,12 +233,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func spaceChanged(notif: NSNotification!) {
         // To implement: https://github.com/gechr/WhichSpace/blob/master/WhichSpace/Classes/AppDelegate.swift
         
-        socket.emit("spaceChange")
+        socket.emit("space-change")
         guard let wallpaperName = updateWallpaper() else {
-            socket.emit("reloadBackground", "default")
+            socket.emit("reload-background", "default")
             return
         }
-        socket.emit("reloadBackground", wallpaperName)
+        socket.emit("reload-background", wallpaperName)
     }
 }
 
@@ -282,7 +282,7 @@ func selectionChangePoller() {
                 }
             }
             if (activatedItemTitle != prevActivatedItemTitle) {
-                socket.emit("selectionChange", activatedItemTitle)
+                socket.emit("selection-change", activatedItemTitle)
                 prevActivatedItemTitle = activatedItemTitle
             }
         }
@@ -305,7 +305,7 @@ func checkForPermissions() {
     let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeRetainedValue() as NSString: true]
     if !AXIsProcessTrustedWithOptions(options) {
         NSLog("No accessibility API permissions, exiting")
-        socket.emit("noAccessibility")
+        socket.emit("no-accessibility")
     }
 }
 
@@ -319,29 +319,29 @@ func createSocket() {
     socket.on(clientEvent: .connect) { (dataArray, ack) in
         NSLog("Connected.")
         disconnectedTimes = 0
-        socket.emit("reloadBackground", "default")
+        socket.emit("reload-background", "default")
         checkForPermissions()
         let menuBarItems = getMenuItemTitles()
         if !menuBarItems.isEmpty {
-            socket.emit("windowChange", menuBarItems)
+            socket.emit("window-change", menuBarItems)
         } else {
-            socket.emit("windowChange", ["Apple", "Error"])
+            socket.emit("window-change", ["Apple", "Error"])
         }
     }
-    socket.on("startSelectionListener") { (dataArray, ack) in
+    socket.on("start-selection-listener") { (dataArray, ack) in
         detectSelectionChange = true
         detectSelectionChangeSetup = false
     }
-    socket.on("stopSelectionListener") { (dataArray, ack) in
+    socket.on("stop-selection-listener") { (dataArray, ack) in
         detectSelectionChange = false
         detectSelectionChangeSetup = false
     }
-    socket.on("getWallpaper") { (dataArray, ack) in
+    socket.on("get-wallpaper") { (dataArray, ack) in
         guard let wp = updateWallpaper() else {
-            socket.emit("reloadBackground", "default")
+            socket.emit("reload-background", "default")
             return
         }
-        socket.emit("reloadBackground", wp)
+        socket.emit("reload-background", wp)
     }
     // shutdown. called on main app exit
     socket.on("shutdown") { (dataArray, ack) in
