@@ -2,7 +2,7 @@
  * Load everything up!
  */
 
-const { screen } = require("electron");
+const { screen, ipcRenderer } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const utils = require(path.resolve(__dirname, "js/utils.js"));
@@ -28,6 +28,8 @@ function spaceChange() {
 }
 
 function reloadBackground(msg) {
+    ipcRenderer.send("wallpaper-change", msg);
+
     let bgimage = document.getElementById("bgimage");
     bgimage.setAttribute(
         "style",

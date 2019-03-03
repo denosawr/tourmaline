@@ -1,5 +1,4 @@
 const fs = require("fs");
-const cp = require("child_process");
 const path = require("path");
 const stripJsonComments = require("strip-json-comments");
 
