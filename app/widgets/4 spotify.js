@@ -10,12 +10,15 @@ const FORMAT = `♫&nbsp&nbsp{}`;
 
 const log = new utils.log(NAME);
 
+let hidden = false;
+
 function update() {
     let process = cp.spawn(COMMAND, [], { shell: true });
 
     process.stdout.on("data", data => {
         data = data.toString().trim();
-        global.widgets[NAME].style.display = data == "hide" ? "none" : "block";
+        hidden = data == "hide";
+        global.widgets[NAME].style.display = hidden ? "none" : "block";
 
         global.widgets[NAME].innerHTML = FORMAT.replace("{}", data);
     });
@@ -42,5 +45,9 @@ module.exports = {
             "left"
         );
         update();
+    },
+
+    update() {
+        global.widgets[NAME].style.display = hidden ? "none" : "block";
     },
 };
