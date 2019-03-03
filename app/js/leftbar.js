@@ -1,8 +1,5 @@
-const cpuStat = require("cpu-stat");
-const disk = require("diskusage");
 const path = require("path");
 const utils = require(path.resolve(__dirname, "../js/utils.js"));
-const cp = require("child_process");
 
 const log = new utils.log("systeminfo");
 

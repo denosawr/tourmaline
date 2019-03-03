@@ -15,8 +15,6 @@
         "killall": "killall tourmaline"
     },
     "dependencies": {
-        "cpu-stat": "^2.0.1",
-        "diskusage": "^1.0.0",
         "express": "^4.16.4",
         "ffi": "^2.3.0",
         "ps-list": "^6.1.0",

@@ -7,7 +7,17 @@ const log = new utils.log("menubar");
 
 let globalEmitter;
 
+/*
+ * Note to my future self:
+ * Example menubar:
+ *     Code File Edit Selection View ...
+ *    ^ appleMenuItem
+ *        ^ localisedNameHolder
+ *             ^ --- ChildMenuBar --- ^
+ */
+
 /**
+ * @private
  * The items in the menubar have changed, reload them.
  * @param {string} data
  */
@@ -36,6 +46,7 @@ function refreshMenuBarItems(data) {
 }
 
 /**
+ * @private
  * The selected menu bar item has changed.
  * @param {UIntArray} data
  */
@@ -59,15 +70,21 @@ function menuItemSelectionChange(data) {
         }
         global.variablesselected = true;
     }
+
+    // Toggle selection status of appleMenuItem
     global.widgets.appleMenuItem.classList[
         selectedElement == "Apple" ? "add" : "remove" // if "Apple" is selected, we add; otherwise, we remove
     ]("menuBarItemSelected");
 }
 
+/**
+ * @private
+ * Update the appleMenuIcon indicator
+ */
 function updateIndicator() {
     let indicator = utils.get("plugins", "menubar", "applemenu", "indicator");
     if (indicator == "indicator") {
-        // show the current space number
+        // Show the current space number
         let spaceNumberPath = utils.getHelperPath("space-number-app");
         let process = cp.spawn(spaceNumberPath, []);
 
@@ -77,6 +94,7 @@ function updateIndicator() {
 
         utils.errorHandler(process, "MenubarIndicator");
     } else {
+        // Show the text specified
         global.widgets.appleMenuItem.textContent = indicator;
     }
 }

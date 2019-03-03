@@ -18,31 +18,6 @@ global.widgets = {};
 global.plugins = {};
 
 /**
- * Loads a plugin and passes in emitter
- * @param {string} pluginName
- */
-function loadPlugin(pluginName) {
-    if (!pluginName.endsWith(".js")) {
-        return;
-    }
-    const plugin = require(__dirname + "/widgets/" + pluginName);
-    plugin.init(emitter);
-}
-
-/**
- * Finds all the plugins and loads them
- */
-function findPlugins() {
-    fs.readdirSync(__dirname + "/widgets", (err, files) => {
-        if (err) {
-            log.error("Unable to load modules:", err);
-            return;
-        }
-        files.forEach(loadPlugin);
-    });
-}
-
-/**
  * Call to refresh the wallpaper.
  */
 function spaceChange() {
@@ -83,9 +58,6 @@ function main() {
         "screen-height": display.size.height + "px",
         "window-height": window.outerHeight + "px",
     });
-
-    // hooks for helper processes
-    // utils.startHelperHooks();
 
     event = require(__dirname + "/js/events.js");
     emitter = event.startListeners();
