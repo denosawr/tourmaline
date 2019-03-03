@@ -11,7 +11,7 @@
 body {
     font-family: var(--cfg-font, BlinkMacSystemFont);
     font-size: 14px;
-    line-height: 22px;
+    line-height: 23px;
 
     overflow: hidden;
     color: var(--cfg-foreground, white);

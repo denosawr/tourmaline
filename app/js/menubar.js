@@ -25,6 +25,7 @@ function refreshMenuBarItems(data) {
     // called when active window
     let menubarObjects = data.splice(1); // remove "Apple" element
 
+    log.log(menubarObjects);
     global.widgets.localizedNameHolder.textContent = menubarObjects[0];
 
     // clear menuBar
@@ -143,9 +144,6 @@ module.exports = {
         global.widgets.localizedNameHolder = utils.makeElement("div", {
             class: ["menuBarItem"],
             id: "localizedNameHolder",
-            style: {
-                fontWeight: "bold",
-            },
             textContent: "Tourmaline is loading...",
         });
 
@@ -171,8 +169,9 @@ module.exports = {
             background: var(--cfg-plugins-menubar-selectedBackground) !important;
         }
 
-        #localizedNameContainer {
+        #localizedNameHolder {
             font-weight: bold;
+            white-space: nowrap;
         }
         
         #appleMenuItem {

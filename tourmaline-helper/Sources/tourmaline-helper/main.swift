@@ -221,8 +221,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         socket.emit("window-change", ["Apple", applicationName])
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {  // this delay may need to be changed
-            let menuBarItems = getMenuItemTitles()
+            var menuBarItems = getMenuItemTitles()
             if !menuBarItems.isEmpty {
+                menuBarItems[1] = applicationName
                 socket.emit("window-change", menuBarItems)
             }
         }
