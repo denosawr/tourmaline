@@ -5,12 +5,13 @@ const cp = require("child_process");
 const utils = require(path.resolve(__dirname, "../js/utils.js"));
 
 const NAME = "networkusage";
-const COMMAND = "sh scripts/network.sh";
 
 const log = new utils.log(NAME);
 
 function update() {
-    let process = cp.spawn(COMMAND, [], { shell: true });
+    let process = cp.spawn("sh", [utils.locateFile("scripts/network.sh")], {
+        shell: true,
+    });
 
     process.stdout.on("data", data => {
         data = data.toString();

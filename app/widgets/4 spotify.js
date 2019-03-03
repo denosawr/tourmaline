@@ -5,7 +5,6 @@ const cp = require("child_process");
 const utils = require(path.resolve(__dirname, "../js/utils.js"));
 
 const NAME = "Spotify";
-const COMMAND = "osascript scripts/spotify.scpt";
 const FORMAT = `♫&nbsp&nbsp{}`;
 
 const log = new utils.log(NAME);
@@ -13,7 +12,11 @@ const log = new utils.log(NAME);
 let hidden = false;
 
 function update() {
-    let process = cp.spawn(COMMAND, [], { shell: true });
+    let process = cp.spawn(
+        "osascript",
+        [utils.locateFile("scripts/spotify.scpt")],
+        { shell: true }
+    );
 
     process.stdout.on("data", data => {
         data = data.toString().trim();

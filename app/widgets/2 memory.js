@@ -5,13 +5,14 @@ const cp = require("child_process");
 const utils = require(path.resolve(__dirname, "../js/utils.js"));
 
 const NAME = "memoryusage";
-const COMMAND = "sh scripts/mem.sh";
 const FORMAT = `<i class="fas fa-memory"></i>&nbsp&nbsp{}GB`;
 
 const log = new utils.log(NAME);
 
 function update() {
-    let process = cp.spawn(COMMAND, [], { shell: true });
+    let process = cp.spawn("sh", [utils.locateFile("scripts/mem.sh")], {
+        shell: true,
+    });
 
     process.stdout.on("data", data => {
         data = parseFloat(data.toString()).toFixed(1);
