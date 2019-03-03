@@ -5,7 +5,6 @@ const utils = require(path.resolve(__dirname, "../js/utils.js"));
 // set up logger
 const log = new utils.log("menubar");
 
-// let menuBar, childMenuBar, localizedNameHolder, child, selectionChangeProcess;
 let globalEmitter;
 
 /**

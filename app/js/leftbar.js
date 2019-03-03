@@ -31,10 +31,29 @@ module.exports = {
     positionBar: function() {
         let r = global.widgets.localizedNameHolder.getBoundingClientRect()
             .right;
-        global.widgets.leftBar.setAttribute(
-            "style",
-            // `left: calc(${r}px - var(--left-margin));`
-            `left: calc(${r}px);`
-        );
+        global.widgets.leftBar.setAttribute("style", `left: calc(${r}px);`);
     },
+
+    style: `
+        #leftBar {
+            position: absolute;
+            z-index: 100;
+            /* color: rgba(255, 255, 255, 0.7); */
+        }
+
+        .leftBarItem {
+            padding-left: 9.5px;
+            padding-right: 9.5px;
+            transition: margin-top 0.15s;
+        }
+
+        #leftBar.itemActivated {
+            margin-top: 22px;
+        }
+
+        #leftBar.itemDeactivated {
+            transition: margin-top 0.15s;
+            margin-top: 0px;
+        }
+    `,
 };

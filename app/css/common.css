@@ -1,4 +1,6 @@
-/* variables */
+/*
+ * Variables and basic attrs
+ */
 
 :root {
     --left-margin: 44.75px;
@@ -6,36 +8,52 @@
     --overflow: 6px;
 }
 
+body {
+    font-family: var(--cfg-font, BlinkMacSystemFont);
+    font-size: 14px;
+    line-height: 22px;
+
+    overflow: hidden;
+    color: var(--cfg-foreground, white);
+    user-select: none;
+
+    opacity: 1;
+    margin: 0;
+}
+
+/*
+ * Background image
+ */
+
 #bgimage {
     min-width: var(--screen-width);
     min-height: var(--screen-height);
+
     background-image: url(file:///private/tmp/wallpaper.png);
     background-position: center;
     background-size: var(--screen-width);
 }
 
 #bgimage-bar {
-    margin: 0 var(--overflow) 0 var(--overflow);
     position: absolute;
     top: 0;
+
     z-index: 1;
+    margin: 0 var(--overflow) 0 var(--overflow);
+
+    /* Placeholder in case image isn't found */
     background: #333;
 
-    transition: -webkit-mask-image 1s;
+    /* transition: -webkit-mask-image 1s; */
 }
 
-body {
-    margin: 0;
-    color: var(--cfg-foreground, white);
-    overflow: hidden;
-    line-height: 22px;
+/*
+ * Actual bar
+ */
 
-    /* font-family: -apple-system, BlinkMacSystemFont; */
-    font-family: var(--cfg-font, BlinkMacSystemFont);
-    font-size: 14px;
-
-    user-select: none;
-    opacity: 1;
+/* Click-through window */
+#top-bar * {
+    pointer-events: none;
 }
 
 .bar {
@@ -43,14 +61,26 @@ body {
     top: 0;
     left: 0;
     right: 0;
+
+    z-index: 2;
     padding: 0 calc(var(--right-margin) + var(--overflow)) 0
         calc(var(--left-margin) + var(--overflow) - 35px);
+
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    z-index: 2;
+
     background: var(--cfg-background, transparent);
+}
+
+/*
+ * Containers config
+ */
+
+.container {
+    display: flex;
+    flex-direction: row;
 }
 
 #left {
@@ -65,45 +95,19 @@ body {
 
 #right {
     margin-right: -25px;
+
     flex: 1;
     justify-content: flex-end;
 }
 
-.container {
-    display: flex;
-    flex-direction: row;
-}
-
-#top-bar * {
-    pointer-events: none;
-}
-
-#leftBar {
-    position: absolute;
-    z-index: 100;
-    /* color: rgba(255, 255, 255, 0.7); */
-}
-
-.leftBarItem {
-    padding-left: 9.5px;
-    padding-right: 9.5px;
-    transition: margin-top 0.15s;
-}
-
-#leftBar.itemActivated {
-    margin-top: 22px;
-}
-
-#leftBar.itemDeactivated {
-    transition: margin-top 0.15s;
-    margin-top: 0px;
-}
+/*
+ * Widgetbar
+ */
 
 .widgetBarItem {
     padding-left: 9.25px;
     padding-right: 9.25px;
     transition: opacity 0.5s;
-    /* color: rgba(255, 255, 255, 0.7); */
 }
 
 .widgetBarItem.itemActivated {
