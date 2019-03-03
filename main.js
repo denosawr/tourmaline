@@ -27,6 +27,7 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
         },
+        backgroundColor: "#00000000",
     });
 
     if (arguments_ && arguments_.includes("--dev")) {
@@ -47,6 +48,9 @@ function createWindow() {
     // and load the index.html of the app.
     win.loadFile(__dirname + "/app/index.html");
     win.setSize(display.size.width + 12, menuBarHeight + 2);
+
+    // TESTING!
+    // win.setSize(display.size.width + 12, 300);
 
     tray = new Tray("app/assets/iconTrayTemplate.png");
     const contextMenu = Menu.buildFromTemplate([
