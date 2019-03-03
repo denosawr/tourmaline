@@ -86,6 +86,22 @@ Object.assign(module.exports, {
     },
 
     /**
+     * @returns the path of the "main" folder (i.e. the one containing main.js)
+     */
+    getMainFolderPath: function() {
+        return path.join(__dirname, "../../");
+    },
+
+    /**
+     * Gets an absolute file path. If not used, everything screws up in the app bundle.
+     * @param {str} filePath The path to the file
+     * @returns absolute file path
+     */
+    locateFile: function(filePath) {
+        return path.join(module.exports.getMainFolderPath(), filePath);
+    },
+
+    /**
      * Searches both Frameworks and the raw file path for the helper app.
      * @param {str} filename the name of the executable
      * @returns path of the found application.

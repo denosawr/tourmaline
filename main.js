@@ -60,7 +60,7 @@ function createWindow() {
     win.loadFile(__dirname + "/app/index.html");
     win.setSize(display.size.width + 12, menuBarHeight + 2);
 
-    tray = new Tray("app/assets/iconTrayTemplate.png");
+    tray = new Tray(utils.locateFile("app/assets/iconTrayTemplate.png"));
 
     return win;
 }
