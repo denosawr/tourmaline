@@ -1,6 +1,9 @@
 # nodejs
 node_modules/
 
+# photoshop for icons
+*.psd
+
 # swift (tourmaline-helper)
 .build
 DerivedData

@@ -8,7 +8,7 @@ fi
 printf "\e[36mPackaging Electron app...\e[90m\n"
 
 # electron-packager - build Electron app to build/
-node_modules/.bin/electron-packager . tourmaline --ignore='tourmaline-helper|build'  --platform=darwin --overwrite
+node_modules/.bin/electron-packager . tourmaline --ignore='tourmaline-helper|build'  --platform=darwin --overwrite --icon app/assets/icon.icns
 
 # move app bundle and clean up (we don't care about license and stuff)
 echo Post-packaging work
