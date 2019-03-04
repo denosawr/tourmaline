@@ -1,6 +1,8 @@
 const strftime = require("strftime");
 const path = require("path");
-const utils = require(path.resolve(__dirname, "../js/utils.js"));
+const utils = require(Object.keys(require.cache).filter(f =>
+    f.endsWith("app/js/utils.js")
+)[0]);
 
 function getTimeString() {
     return strftime("%a ") + strftime("%l:").trim() + strftime("%M %P");

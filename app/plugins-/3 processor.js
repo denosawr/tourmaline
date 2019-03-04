@@ -2,11 +2,13 @@ const path = require("path");
 const cp = require("child_process");
 
 // tourmaline-specific modules
-const utils = require(path.resolve(__dirname, "../js/utils.js"));
+const utils = require(Object.keys(require.cache).filter(f =>
+    f.endsWith("app/js/utils.js")
+)[0]);
 
-const NAME = "diskusage";
-const COMMAND = 'df -h | grep -m 1 "/" | awk -F" " \'{print $3+0}\'';
-const FORMAT = `<i class="fas fa-hdd"></i>&nbsp&nbsp{}GB`;
+const NAME = "processorusage";
+const COMMAND = "ps -A -o %cpu | awk '{s+=$1} END {print s}'";
+const FORMAT = `<i class="fas fa-laptop"></i>&nbsp&nbsp{}%`;
 
 const log = new utils.log(NAME);
 
@@ -29,7 +31,7 @@ function update() {
 module.exports = {
     name: NAME,
 
-    description: "Shows disk usage.",
+    description: "Shows processor utilisation.",
 
     config: {
         refreshRate: 2000,

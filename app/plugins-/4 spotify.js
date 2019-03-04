@@ -2,21 +2,34 @@ const path = require("path");
 const cp = require("child_process");
 
 // tourmaline-specific modules
-const utils = require(path.resolve(__dirname, "../js/utils.js"));
+const utils = require(Object.keys(require.cache).filter(f =>
+    f.endsWith("app/js/utils.js")
+)[0]);
 
 const NAME = "Spotify";
 const FORMAT = `♫&nbsp&nbsp{}`;
+
+const SCRIPT = `
+if application "Spotify" is running then
+	tell application "Spotify"
+		if player state is playing then
+			set result to (get artist of current track) & " - " & (get name of current track)
+		else
+			set result to "hide"
+		end if
+	end tell
+else
+	set result to "hide"
+end if
+`;
 
 const log = new utils.log(NAME);
 
 let hidden = false;
 
 function update() {
-    let process = cp.spawn(
-        "osascript",
-        [utils.locateFile("scripts/spotify.scpt")],
-        { shell: true }
-    );
+    let process = cp.spawn("osascript", [], { shell: true });
+    process.stdin.end(SCRIPT);
 
     process.stdout.on("data", data => {
         data = data.toString().trim();

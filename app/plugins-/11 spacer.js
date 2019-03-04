@@ -1,7 +1,9 @@
 const path = require("path");
 
 // tourmaline-specific modules
-const utils = require(path.resolve(__dirname, "../js/utils.js"));
+const utils = require(Object.keys(require.cache).filter(f =>
+    f.endsWith("app/js/utils.js")
+)[0]);
 
 const NAME = "Spacer";
 
