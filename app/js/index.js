@@ -3,11 +3,14 @@
  */
 
 const { screen, ipcRenderer } = require("electron");
-const fs = require("fs");
+const fs = require("fs-extra");
 const path = require("path");
 const utils = require(path.resolve(__dirname, "js/utils.js"));
 
-const log = new utils.log("main");
+const homedir = require("os").homedir();
+const CONFIGDIR = path.resolve(homedir, ".config/tourmaline/");
+
+const log = new utils.log("index");
 
 let event, emitter; // will be imported/defined later in main()
 let count = 0;
@@ -70,19 +73,41 @@ function main() {
     require(__dirname + "/js/activation.js").init(emitter);
 
     // Load menubar and infobar
-    let requiredPlugins = ["menubar", "leftbar"].map(x =>
+    let plugins = ["menubar", "leftbar"].map(x =>
         require(__dirname + "/js/" + x)
     );
 
-    // Find all plugins from dir
-    let plugins = requiredPlugins.concat(
-        // first load the requiredPlugins in that order
+    // Make .config/tourmaline and .config/tourmaline/plugins
+    if (!fs.existsSync(CONFIGDIR)) {
+        // Make the directory
+        fs.mkdirSync(CONFIGDIR, { recursive: true });
+    }
+    if (!fs.existsSync(path.resolve(CONFIGDIR, "plugins"))) {
+        // Copy plugins
+        fs.copySync(
+            __dirname + "/plugins/",
+            path.resolve(CONFIGDIR, "plugins")
+        );
+    }
+
+    // Symlink app/node_modules ❯ .config/tourmaline/node_modules
+    const SYMLINKPATH = path.resolve(CONFIGDIR, "node_modules");
+    if (fs.existsSync(SYMLINKPATH)) {
+        fs.unlinkSync(SYMLINKPATH);
+    }
+    fs.symlinkSync(
+        path.resolve(utils.getMainFolderPath(), "node_modules"),
+        SYMLINKPATH
+    );
+
+    // Load plugins from config
+    plugins = plugins.concat(
         fs
-            .readdirSync(__dirname + "/widgets")
+            .readdirSync(path.resolve(CONFIGDIR, "plugins"))
             .filter(x => x.endsWith(".js")) // Remove non-javascript files
 
             // Import all the plugins
-            .map(x => require(__dirname + "/widgets/" + x))
+            .map(x => require(path.resolve(CONFIGDIR, "plugins", x)))
             .sort()
     );
 

@@ -106,13 +106,17 @@ let menuItemsTemplate = [
     {
         label: "Show Configuration File",
         click: () => {
-            opn(path.join(homedir, ".config/tourmaline.json"), { wait: false });
+            opn(path.join(homedir, ".config/tourmaline/config.json"), {
+                wait: false,
+            });
         },
     },
     {
-        label: "Open Plugins Folder",
+        label: "Open Configuration Folder",
         click: () => {
-            opn(homedir, { wait: false });
+            opn(path.join(homedir, ".config/tourmaline/"), {
+                wait: false,
+            });
         },
     },
 

@@ -25,7 +25,7 @@ function refreshMenuBarItems(data) {
     // called when active window
     let menubarObjects = data.splice(1); // remove "Apple" element
 
-    log.log(menubarObjects);
+    // log.log(menubarObjects);
     global.widgets.localizedNameHolder.textContent = menubarObjects[0];
 
     // clear menuBar

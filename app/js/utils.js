@@ -141,7 +141,10 @@ Object.assign(module.exports, {
  * --------------------------------------------------------
  */
 
-const CONFIG_PATH = path.join(process.env.HOME, ".config/tourmaline.json");
+const CONFIG_PATH = path.join(
+    require("os").homedir(),
+    ".config/tourmaline/config.json"
+);
 let currentDesktopWallpaper = "default";
 
 let config = {}; // for the loaded config file
